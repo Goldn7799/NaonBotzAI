@@ -263,7 +263,7 @@ handler.on("message", async m =>{
     }else if (text.includes("isekai")){
       m.reply(pickRandom(["WIBUU", "DASAR WIBU"]))
     }else if(similarity(text, "kamu bot?") >= medium||similarity(text, "lu bot?") >= medium){
-      let txt = pickRandom("Iyaa", "Hooh", "Iya gw bot", "Lu kira gw apaan?, Babi?")
+      let txt = pickRandom(["Iyaa", "Hooh", "Iya gw bot", "Lu kira gw apaan?, Babi?"])
       m.reply(txt)
       if(txt.includes("Lu kira gw apaan?")){
         if(idSession > -1){
@@ -283,7 +283,7 @@ handler.on("message", async m =>{
         }
       };
     }else if(similarity(text, "keren kaga") >= medium||similarity(text, "keren kan") >= medium){
-      m.reply(pickRandom("GG", "Bagus bet", "Keren Banget"))
+      m.reply(pickRandom(["GG", "Bagus bet", "Keren Banget"]))
       if(idSession > -1){
         sessions[idSession].state = "trim"
       }else {
