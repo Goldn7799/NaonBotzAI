@@ -307,8 +307,16 @@ handler.on("message", async m =>{
       m.reply(pickRandom(["Mager jawab :v, lagi rebahan", "ohh, males, gw lagi rebahan"]))
       sessions[idSession].state = ""
     }else if(state === "pe"){
-      m.reply(pickRandom(["BGST", "ANJ", "Dasar OM OM", "SAT"]))
-      sessions[idSession].state = ""
+      if (similarity(text, "assalamualaikum") >= medium){
+        m.reply("Waalaikumsalam")
+        sessions[idSession].state = ""
+      }else if (similarity(text, "shalom") >= medium||similarity(text, "misi") >= medium){
+        m.reply("Nah Gitu Dong")
+        sessions[idSession].state = ""
+      }else {
+        m.reply(pickRandom(["BGST", "ANJ", "Dasar OM OM", "SAT"]))
+        sessions[idSession].state = ""
+      }
     }else if(state === "trim"){
       if(similarity(text, "trimakasih") >= medium){
         m.reply("sama sama :)");
