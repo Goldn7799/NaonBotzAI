@@ -119,8 +119,6 @@ handler.on("message", async m =>{
         }
       };
       m.reply(apWord)
-    }else if(text.includes("kontol")||text.includes("bangsat")||text.includes("anjing")||text.includes("asu")){
-      m.react("🙉")
     }else if(similarity(text.split(" ")[0], "oke") >= high){
       m.react("😉")
     }else if (similarity(text.split(" ")[0], "woi") >= high){
@@ -147,7 +145,15 @@ handler.on("message", async m =>{
         sessions.push({"id": ids, "state": "rbhn"})
       }
     }else if(similarity(text.split(" ")[0], "masa") >= high||similarity(text.split(" ")[0], "mosok") >= high||similarity(text.split(" ")[0], "affaiyah") >= high){
-      m.reply(pickRandom(['iya', 'y', 'iya ajg']))
+      let txt = pickRandom(['iya', 'y', 'iya ajg'])
+      m.reply(txt)
+      if(txt.includes("ajg")){
+        if(idSession > -1){
+          sessions[idSession].state = "woireack"
+        }else {
+          sessions.push({"id": ids, "state": "woireack"})
+        }
+      };
     }else if(similarity(text.split([" "])[0]+""+text.split([" "])[1], "tanggal berapa") >= medium||similarity(text.split([" "])[0]+""+text.split([" "])[1], "hari apa") >= medium||similarity(text.split([" "])[0]+""+text.split([" "])[1], "jam berapa") >= medium||similarity(text.split([" "])[0]+""+text.split([" "])[1], "tahun berapa") >= medium){
       m.reply(`Sekarang ${Date()}`)
     }
@@ -181,18 +187,10 @@ handler.on("message", async m =>{
       }
     }else if(text.substring(0, 2) === "oo"){
       m.reply(pickRandom["ohh", "ooo", "ooalah"])
-    }else if(text.includes("bot")){
-      let tex = pickRandom(["Lu manggil gw?", `Ada apa ${names}`, "GW DI SINI"]);
-      m.reply(tex)
-      if(tex.includes("Lu manggil gw?")){
-        if(idSession > -1){
-          sessions[idSession].state = "mggl"
-        }else {
-          sessions.push({"id": ids, "state": "mggl"})
-        }
-      };
     }else if((similarity(text.split(" ")[1], "kontol") >= high||similarity(text.split(" ")[1], "asu") >= high||similarity(text.split(" ")[1], "bangsat") >= high||similarity(text.split(" ")[1], "gaje") >= high)&&text.split(" ")[0] === "bot"){
       m.react(pickRandom(["😁", "😂", "🤗"]))
+    }else if(text.includes("kontol")||text.includes("bangsat")||text.includes("anjing")||text.includes("asu")){
+      m.react("🙉")
     }else if (similarity(text.split(" ")[0], "berapa") >= high&&text.split(" ")[2]){
       try {
         if(similarity(text.split(" ")[2], "ditambah") >= high||text.split(" ")[2] === "+"){
@@ -225,7 +223,15 @@ handler.on("message", async m =>{
     }else if(text.includes("saya cewe")||text.includes("gw cewe")||text.includes("aku cewe")){
       m.react(pickRandom(["😀", "😍", "🥰", "😜"]))
     }else if(similarity(text, "kamu nanyea") >= medium){
-      m.reply(pickRandom(["IYAA", "HOOH", "IYA AJG"]))
+      let txt = pickRandom(["IYAA", "HOOH", "IYA AJG"])
+      m.reply(txt)
+      if(txt.includes("ajg")){
+        if(idSession > -1){
+          sessions[idSession].state = "woireack"
+        }else {
+          sessions.push({"id": ids, "state": "woireack"})
+        }
+      };
     }else if(text.includes("orang mana")){
       m.reply(pickRandom(["orang mars", "Aku orang mars kak", "aku orang bumi", "aku orang isekai"]))
     }else if(text.includes("om om")){
@@ -240,6 +246,16 @@ handler.on("message", async m =>{
           sessions[idSession].state = "lkgpn"
         }else {
           sessions.push({"id": ids, "state": "lkgpn"})
+        }
+      };
+    }else if(text.includes("bot")){
+      let tex = pickRandom(["Lu manggil gw?", `Ada apa ${names}`, "GW DI SINI"]);
+      m.reply(tex)
+      if(tex.includes("Lu manggil gw?")){
+        if(idSession > -1){
+          sessions[idSession].state = "mggl"
+        }else {
+          sessions.push({"id": ids, "state": "mggl"})
         }
       };
     }else if(similarity(text, "keren kaga") >= medium||similarity(text, "keren kan") >= medium){
@@ -298,7 +314,7 @@ handler.on("message", async m =>{
         }
       }
     }else if(state === "woireack"){
-      if(similarity(text.split([" "])[0]+""+text.split([" "])[1], "tidak ramah"||text.includes("ngegas")||text.includes("ajg")||text.includes("ajg")) >= medium){
+      if(similarity(text.split([" "])[0]+""+text.split([" "])[1], "tidak ramah"||text.includes("ngegas")||text.includes("anj")||text.includes("ajg")) >= medium){
         m.react("🤣")
         sessions[idSession].state = ""
       }else {
@@ -311,6 +327,7 @@ handler.on("message", async m =>{
     }else if(state === "pe"){
       if (similarity(text, "assalamualaikum") >= medium){
         m.reply("Waalaikumsalam")
+        chat.sendMessage("Nah Gitu Dong")
         sessions[idSession].state = ""
       }else if (similarity(text, "shalom") >= medium||similarity(text, "misi") >= medium){
         m.reply("Nah Gitu Dong")
