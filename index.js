@@ -256,6 +256,8 @@ handler.on("message", async m =>{
       m.reply(pickRandom(["Makan, Tidur doang", "Pengganguran", "Turu", "Rebahan"]))
     }else if(await m.mentionedIds.includes(await handler.info.me.user)){
       m.reply(pickRandom(["Apaan?", "Ada apa?", "Affah?", "Ngapain ngetag?"]))
+    }else if (similarity(text, "assalamualaikum") >= medium){
+      m.reply("Waalaikumsalam")
     };
   }
   
