@@ -423,7 +423,7 @@ handler.on("message", async m =>{
         }
       }
     }else if(state === "woireack"){
-      if(similarity(text.split([" "])[0]+""+text.split([" "])[1], "tidak ramah"||text.includes("ngegas")||text.includes("anj")||text.includes("ajg")) >= medium){
+      if(similarity(text.split([" "])[0]+""+text.split([" "])[1], "tidak ramah") >= medium||text.includes("ngegas")||text.includes("anj")||text.includes("ajg")){
         m.react("🤣")
         sessions[idSession].state = ""
       }else {
