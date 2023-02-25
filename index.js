@@ -14,7 +14,7 @@ console.log("Starting...")
 Host.initialize();
 
 Host.on("message", async m =>{
-  console.log(`Recived => ${m.from}(${(await m.getChat()).name}) | ${m._data.notifyName} => ${m.body}`);
+  console.log(`Recived => ${m.from}(${(await m.getChat()).name}) | ${m.author}(${m._data.notifyName}) => ${m.body}`);
   isAlreadyInDatabase = false
   if(m.from.split("@")[1] === "g.us"){
     db.group.map(dt =>{
@@ -77,9 +77,33 @@ const pickRandom = (wordList)=>{
 handler.on("message", async m =>{
   let text = (m.body).toLocaleLowerCase();
   let names = m._data.notifyName;
-  let ids = names;
+  let ids = m.author;
   let chat = await m.getChat();
-  let mention = await m.getMentions();
+  let mention = await (await m.getMentions())[0];
+  let ownerNumber;
+  let isAdminGroup, isMentionAdmin, isMentionOwner;
+  if (chat.isGroup){
+    ownerNumber = chat.groupMetadata.owner.user
+    for (let participant of chat.participants){
+      if(participant.id._serialized === m.author && participant.isAdmin){
+        isAdminGroup = true;
+      };
+    }
+  };
+  if(mention){
+    if (chat.isGroup){
+      for (let participant of chat.participants){
+        if(participant.id._serialized === `${mention.number}@c.us` && participant.isAdmin){
+          isMentionAdmin = true;
+        };
+      }
+    };
+    if (ownerNumber === mention.number){
+      isMentionOwner = true;
+    }else {
+      isMentionOwner = false;
+    }
+  };
   let high = 0.75;
   let medium = 0.65;
   let low = 0.55;
@@ -274,6 +298,91 @@ handler.on("message", async m =>{
       m.reply(pickRandom(["Apaan?", "Ada apa?", "Affah?", "Ngapain ngetag?"]))
     }else if (similarity(text, "assalamualaikum") >= medium){
       m.reply("Waalaikumsalam")
+    }else if(similarity(text, "buka grup") >= high){
+      if(chat.isGroup){
+          if(isAdminGroup){
+            chat.setMessagesAdminsOnly(false)
+            m.reply("Berhasil buka grup")
+            if(idSession > -1){
+              sessions[idSession].state = "trim"
+            }else {
+              sessions.push({"id": ids, "state": "trim"})
+            }
+          }else {
+            m.reply("Anda Bukan Admin")
+          }
+      }else {
+        m.reply("Pastikan anda di dalam grup")
+      }
+    }else if(similarity(text, "tutup grup") >= high){
+      if(chat.isGroup){
+        if(isAdminGroup){
+            chat.setMessagesAdminsOnly(true)
+            m.reply("Berhasil menutup grup")
+            if(idSession > -1){
+              sessions[idSession].state = "trim"
+            }else {
+              sessions.push({"id": ids, "state": "trim"})
+            }
+          }else {
+            m.reply("Anda Bukan Admin")
+          }
+      }else {
+        m.reply("Pastikan anda di dalam grup")
+      }
+    }else if (similarity(text, "keren") >= medium){
+      m.reply(pickRandom(["Trimakasih", "Makasih"]))
+      m.react("😘")
+    }else if (similarity(text.split(" ")[0], "promote") >= high){
+      if(chat.isGroup){
+        if(isAdminGroup){
+          if(mention){
+            if(!isMentionAdmin){
+              await chat.promoteParticipants([`${mention.number}@c.us`])
+              await chat.sendMessage(`Yey *${mention.name}* sekarang jadi admin`, { mentions: [await handler.getContactById(`${mention.number}@c.us`)] })
+              if(idSession > -1){
+                sessions[idSession].state = "trim"
+              }else {
+                sessions.push({"id": ids, "state": "trim"})
+              }
+            }else {
+              m.reply(`*${mention.name}* sudah menjadi admin`)
+            }
+          }else { 
+            m.reply("Tolong mention salah satu")
+            if(idSession > -1){
+              sessions[idSession].state = "mtnp"
+            }else {
+              sessions.push({"id": ids, "state": "mtnp"})
+            }
+          }
+        }else { m.reply("Anda bukan admin") }
+      }else { m.reply("Pastikan anda di dalam grup") }
+    }else if (similarity(text.split(" ")[0], "demote") >= high){
+      if(chat.isGroup){
+        if(isAdminGroup){
+          if(mention){
+            if(isMentionAdmin){
+              if(!isMentionOwner){
+                await chat.demoteParticipants([`${mention.number}@c.us`])
+                await chat.sendMessage(`Selamat *${mention.name}* bukan admin lagi`, { mentions: [await handler.getContactById(`${mention.number}@c.us`)] })
+                if(idSession > -1){
+                  sessions[idSession].state = "trim"
+                }else {
+                  sessions.push({"id": ids, "state": "trim"})
+                }
+              }else { m.reply("Tidak bisa mengkudeta *Owner* grup") }
+            }else{ m.reply(`*${mention.name}* sudah bukan menjadi admin`) }
+          }else { 
+            m.reply("Tolong mention salah satu")
+            if(idSession > -1){
+              sessions[idSession].state = "mtnd"
+            }else {
+              sessions.push({"id": ids, "state": "mtnd"})
+            }
+          }
+        }else { m.reply("Anda bukan admin") }
+      }else { m.reply("Pastikan anda di dalam grup") }
     };
   }
   
@@ -364,6 +473,40 @@ handler.on("message", async m =>{
       if(text.includes("iya")||text.includes("hooh")){
         m.reply(pickRandom(["BGST", "ANJ", "WTF"]))
         sessions[idSession].state = ""
+      }else {
+        sessions[idSession].state = ""
+        next()
+      }
+    }else if(state === "mtnp"){
+      if(mention&&chat.isGroup&&isAdminGroup&&!text.split(" ")[1]){
+        if(!isMentionAdmin){
+          await chat.promoteParticipants([`${mention.number}@c.us`])
+          await chat.sendMessage(`Yey *${mention.name}* sekarang jadi admin`, { mentions: [await handler.getContactById(`${mention.number}@c.us`)] })
+          if(idSession > -1){
+            sessions[idSession].state = "trim"
+          }else {
+            sessions.push({"id": ids, "state": "trim"})
+          }
+        }else {
+          m.reply(`*${mention.name}* sudah menjadi admin`)
+        }
+      }else {
+        sessions[idSession].state = ""
+        next()
+      }
+    }else if(state === "mtnd"){
+      if(mention&&chat.isGroup&&isAdminGroup&&!text.split(" ")[1]){
+        if(isMentionAdmin){
+          if(!isMentionOwner){
+            await chat.demoteParticipants([`${mention.number}@c.us`])
+            await chat.sendMessage(`Selamat *${mention.name}* bukan admin lagi`, { mentions: [await handler.getContactById(`${mention.number}@c.us`)] })
+            if(idSession > -1){
+              sessions[idSession].state = "trim"
+            }else {
+              sessions.push({"id": ids, "state": "trim"})
+            }
+          }else { m.reply("Tidak bisa mengkudeta *Owner* grup") }
+        }else{ m.reply(`*${mention.name}* sudah bukan menjadi admin`) }
       }else {
         sessions[idSession].state = ""
         next()
