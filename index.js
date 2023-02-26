@@ -83,7 +83,7 @@ handler.on("message", async m =>{
   let ownerNumber;
   let isAdminGroup, isMentionAdmin, isMentionOwner;
   if (chat.isGroup){
-    ownerNumber = chat.groupMetadata.owner.user
+    ownerNumber = await chat.groupMetadata.owner.user
     for (let participant of chat.participants){
       if(participant.id._serialized === m.author && participant.isAdmin){
         isAdminGroup = true;
