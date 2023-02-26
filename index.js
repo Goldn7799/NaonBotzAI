@@ -31,8 +31,14 @@ read()
 Host.initialize();
 console.log("Connecting to WhatsApp...")
 
+Host.on("message_create", async mes =>{
+  const chatsMe = await mes.getChat()
+  if(mes.fromMe){
+    console.log(`Sent :: ${mes.from}(${chatsMe.name}) | ${handler.info.pushname} => ${mes.body}`)
+  };
+})
 Host.on("message", async m =>{
-  console.log(`Recived => ${m.from}(${(await m.getChat()).name}) | ${m.author}(${m._data.notifyName}) => ${m.body}`);
+  console.log(`Recived :: ${m.from}(${(await m.getChat()).name}) | ${m.author}(${m._data.notifyName}) => ${m.body}`);
   isAlreadyInDatabase = false
   if(m.from.split("@")[1] === "g.us"){
     db.group.map(dt =>{
@@ -104,7 +110,7 @@ handler.on("message", async m =>{
     let mention = await (await m.getMentions())[0];
     let textSplit = text.split(" ");
     let ownerNumber;
-    let isAdminGroup, isMentionAdmin, isMentionOwner;
+    let isAdminGroup, isMentionAdmin, isMentionOwner, isMeAdmin;
     let idSession, i= 0;
     let dbIds = 0, dis = 0;
     sessions.map(dts =>{
@@ -123,6 +129,11 @@ handler.on("message", async m =>{
       for (let participant of chat.participants){
         if(participant.id._serialized === m.author && participant.isAdmin){
           isAdminGroup = true;
+        };
+      }
+      for (let participant of chat.participants){
+        if(participant.id._serialized === `${handler.info.wid.user}@c.us` && participant.isAdmin){
+          isMeAdmin = true;
         };
       }
     };
@@ -409,58 +420,62 @@ handler.on("message", async m =>{
         }else if (similarity(text.split(" ")[0], "promote") >= high){
           db.chat[dbIds].rpt.babu++;
           if(chat.isGroup){
-            if(isAdminGroup){
-              if(mention){
-                if(!isMentionAdmin){
-                  if(!mention.isMe){
-                    await chat.promoteParticipants([`${mention.number}@c.us`])
-                    await chat.sendMessage(`Yey *${(mention.name) ? mention.name : mention.number}* sekarang jadi admin`, { mentions: [await handler.getContactById(`${mention.number}@c.us`)] })
-                    if(idSession > -1){
-                      sessions[idSession].state = "trim"
-                    }else {
-                      sessions.push({"id": ids, "state": "trim"})
-                    }
-                  }else { m.reply("Tidak dapat mengubah info saya sendiri") }
-                }else {
-                  m.reply(`*${(mention.name) ? mention.name : mention.number}* sudah menjadi admin`)
-                }
-              }else { 
-                m.reply("Tolong mention salah satu")
-                if(idSession > -1){
-                  sessions[idSession].state = "mtnp"
-                }else {
-                  sessions.push({"id": ids, "state": "mtnp"})
-                }
-              }
-            }else { m.reply("Anda bukan admin") }
-          }else { m.reply("Pastikan anda di dalam grup") }
-        }else if (similarity(text.split(" ")[0], "demote") >= high){
-          db.chat[dbIds].rpt.babu++;
-          if(chat.isGroup){
-            if(isAdminGroup){
-              if(mention){
-                if(isMentionAdmin){
-                  if(!isMentionOwner){
+            if(isMeAdmin){
+              if(isAdminGroup){
+                if(mention){
+                  if(!isMentionAdmin){
                     if(!mention.isMe){
-                      await chat.demoteParticipants([`${mention.number}@c.us`])
-                      await chat.sendMessage(`Selamat *${(mention.name) ? mention.name : mention.number}* bukan admin lagi`, { mentions: [await handler.getContactById(`${mention.number}@c.us`)] })
+                      await chat.promoteParticipants([`${mention.number}@c.us`])
+                      await chat.sendMessage(`Yey *${(mention.name) ? mention.name : mention.number}* sekarang jadi admin`, { mentions: [await handler.getContactById(`${mention.number}@c.us`)] })
                       if(idSession > -1){
                         sessions[idSession].state = "trim"
                       }else {
                         sessions.push({"id": ids, "state": "trim"})
                       }
                     }else { m.reply("Tidak dapat mengubah info saya sendiri") }
-                  }else { m.reply("Tidak bisa mengkudeta *Owner* grup") }
-                }else{ m.reply(`*${(mention.name) ? mention.name : mention.number}* sudah bukan menjadi admin`) }
-              }else { 
-                m.reply("Tolong mention salah satu")
-                if(idSession > -1){
-                  sessions[idSession].state = "mtnd"
-                }else {
-                  sessions.push({"id": ids, "state": "mtnd"})
+                  }else {
+                    m.reply(`*${(mention.name) ? mention.name : mention.number}* sudah menjadi admin`)
+                  }
+                }else { 
+                  m.reply("Tolong mention salah satu")
+                  if(idSession > -1){
+                    sessions[idSession].state = "mtnp"
+                  }else {
+                    sessions.push({"id": ids, "state": "mtnp"})
+                  }
                 }
-              }
-            }else { m.reply("Anda bukan admin") }
+              }else { m.reply("Anda bukan admin") }
+            }else { m.reply("saya bukan admin grup :v") }
+          }else { m.reply("Pastikan anda di dalam grup") }
+        }else if (similarity(text.split(" ")[0], "demote") >= high){
+          db.chat[dbIds].rpt.babu++;
+          if(chat.isGroup){
+            if(isMeAdmin){
+              if(isAdminGroup){
+                if(mention){
+                  if(isMentionAdmin){
+                    if(!isMentionOwner){
+                      if(!mention.isMe){
+                        await chat.demoteParticipants([`${mention.number}@c.us`])
+                        await chat.sendMessage(`Selamat *${(mention.name) ? mention.name : mention.number}* bukan admin lagi`, { mentions: [await handler.getContactById(`${mention.number}@c.us`)] })
+                        if(idSession > -1){
+                          sessions[idSession].state = "trim"
+                        }else {
+                          sessions.push({"id": ids, "state": "trim"})
+                        }
+                      }else { m.reply("Tidak dapat mengubah info saya sendiri") }
+                    }else { m.reply("Tidak bisa mengkudeta *Owner* grup") }
+                  }else{ m.reply(`*${(mention.name) ? mention.name : mention.number}* sudah bukan menjadi admin`) }
+                }else { 
+                  m.reply("Tolong mention salah satu")
+                  if(idSession > -1){
+                    sessions[idSession].state = "mtnd"
+                  }else {
+                    sessions.push({"id": ids, "state": "mtnd"})
+                  }
+                }
+              }else { m.reply("Anda bukan admin") }
+            }else { m.reply("Saya bukan admin grup :v") }
           }else { m.reply("Pastikan anda di dalam grup") }
         }else if(similarity(textSplit[0]+" "+textSplit[1]+" "+textSplit[2], "siapa yang paling") >= medium){
           if(chat.isGroup){
@@ -534,11 +549,11 @@ Saya bisa promote/demote user di grup, bisa mengirim pesan balasan, bisa mencari
         // }
         ;
         
-        ///2
-        if((await m._data.notifyName).toLocaleLowerCase().includes("bot")&&db.chat[dbIds].rpt.botAngryLevel >= 4){
-          chat.sendMessage(`Bot kok mainan bot :v *@${m._data.notifyName}*`, { mentions: [await handler.getContactById(ids)] });
-          db.chat[dbIds].rpt.botAngryLevel -= 2;
-        };
+        // ///2
+        // if((await m._data.notifyName).toLocaleLowerCase().includes("bot")&&db.chat[dbIds].rpt.botAngryLevel >= 4){
+        //   chat.sendMessage(`Bot kok mainan bot :v *@${m._data.notifyName}*`, { mentions: [await handler.getContactById(ids)] });
+        //   db.chat[dbIds].rpt.botAngryLevel -= 2;
+        // };
       }catch(e){
         await handler.sendMessage("6281228020195@c.us", `${await e}`)
         throw e
@@ -588,21 +603,25 @@ Saya bisa promote/demote user di grup, bisa mengirim pesan balasan, bisa mencari
         db.chat[dbIds].rpt.botAngryLevel--;
         sessions[idSession].state = ""
       }else if(state === "woireac"){
-        if(!sessions[idSession].repeat){
+        if(similarity(text, "ngga") >= high||similarity(text, "kaga") >= high){
           m.reply(pickRandom(["Oalah", "Ohh"]))
-          sessions[idSession].repeat = true
-        }else {
-          if(text.includes("woi")){
+          sessions[idSession].repeat = false
+          sessions[idSession].state = ""
+        }else if(text.includes("woi")){
+          if(sessions[idSession].repeat){
             m.reply(pickRandom(["Asw", "Bacod kontol"]))
             db.chat[dbIds].rpt.botAngryLevel++;
             db.chat[dbIds].rpt.bad++;
             sessions[idSession].repeat = false
             sessions[idSession].state = ""
           }else {
-            sessions[idSession].repeat = false
-            sessions[idSession].state = ""
-            next()
+            sessions[idSession].repeat = true
+            next();
           }
+        }else {
+          sessions[idSession].repeat = false
+          sessions[idSession].state = ""
+          next()
         }
       }else if(state === "woireack"){
         if(similarity(text.split([" "])[0]+""+text.split([" "])[1], "tidak ramah") >= medium||text.includes("ngegas")||text.includes("anj")||text.includes("ajg")){
@@ -671,7 +690,7 @@ Saya bisa promote/demote user di grup, bisa mengirim pesan balasan, bisa mencari
           next()
         }
       }else if(state === "mtnp"){
-        if(mention&&chat.isGroup&&isAdminGroup&&!text.split(" ")[1]){
+        if(mention&&chat.isGroup&&isAdminGroup&&!text.split(" ")[1]&&isMeAdmin){
           db.chat[dbIds].rpt.babu++;
           if(!isMentionAdmin){
             if(!mention.isMe){
@@ -691,7 +710,7 @@ Saya bisa promote/demote user di grup, bisa mengirim pesan balasan, bisa mencari
           next()
         }
       }else if(state === "mtnd"){
-        if(mention&&chat.isGroup&&isAdminGroup&&!text.split(" ")[1]){
+        if(mention&&chat.isGroup&&isAdminGroup&&!text.split(" ")[1]&&isMeAdmin){
           db.chat[dbIds].rpt.babu++;
           if(isMentionAdmin){
             if(!isMentionOwner){
