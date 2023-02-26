@@ -600,6 +600,8 @@ Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSay
               }
             }else { await m.reply("Gw bukan admin :v") }
           };
+        }else if(m.type === "chat"&&(mirip(text, "nama kamu siapa")||mirip(text, "nama mu siapa")||mirip(text, "nama lu siapa"))){
+          await m.reply(`Hai, perkenalkan nama ku *${handler.info.pushname}*, aku adalah bot AI buatan *Syeif Sultoni Akbar*, Salam Kenal :)`)
         };
         
         // ///2
