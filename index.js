@@ -38,7 +38,7 @@ Host.on("message_create", async mes =>{
   };
 })
 Host.on("message", async m =>{
-  console.log(`Recived :: ${m.from}(${(await m.getChat()).name}) | ${m.author}(${m._data.notifyName}) => ${(mes.type === "chat") ? mes.body : (mes.type === "sticker") ? "Stiker 😃" : (mes.type === "image") ? "Foto 📷" : (mes.type === "video") ? "Video 🎥" : (mes.type === "audio") ? "Audio 🔉" : (mes.type === "document") ? "Document 📃" : (mes.type === "location") ? "Lokasi 👆" : (mes.type === "contact") ? "Kontak 👤" : "IDK ❓"}`);
+  console.log(`Recived :: ${m.from}(${(await m.getChat()).name}) | ${m.author}(${m._data.notifyName}) => ${(m.type === "chat") ? m.body : (m.type === "sticker") ? "Stiker 😃" : (m.type === "image") ? "Foto 📷" : (m.type === "video") ? "Video 🎥" : (m.type === "audio") ? "Audio 🔉" : (m.type === "document") ? "Document 📃" : (m.type === "location") ? "Lokasi 👆" : (m.type === "contact") ? "Kontak 👤" : "IDK ❓"}`);
   isAlreadyInDatabase = false
   if(m.from.split("@")[1] === "g.us"){
     db.group.map(dt =>{
