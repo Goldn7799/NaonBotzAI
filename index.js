@@ -554,7 +554,7 @@ handler.on("message", async m =>{
         }else if(similarity(text, "lu bisa apa saja") >= medium||similarity(text, "kamu bisa apa saja") >= medium||similarity(text, "lu bisa apa") >= medium||similarity(text, "kamu bisa apa") >= medium){
           await m.react("😁");
           await m.reply(`
-Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSaya bisa *pilih orang random*,\nSaya bisa mencari paling(random) dengan kata kunci *siapa yang paling*,\nSaya bisa *buatin stiker*,\nSaya bisa memberi tahu *berita terkini*,\nSaya bisa membalas chat anda,\nSaya bisa marah, memahami sifat seseorang, memahami kebiasaan
+Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSaya bisa *pilih orang random*,\nSaya bisa mencari paling(random) dengan kata kunci *siapa yang paling*,\nSaya bisa *buatin stiker*,\nSaya bisa memberi tahu *berita terkini*,\nSaya bisa membalas chat anda,\nSaya bisa mencarikan sesuatu di google, contoh *Gimana caranya bersiul?*,\nSaya bisa marah, memahami sifat seseorang, memahami kebiasaan
           `)
           await chat.sendMessage("Jika butuh bantuan silahkan hubungi owner :), AI ini masih dalam tahap pengembangan :v", { mentions: [await handler.getContactById(ids)] });
           await chat.sendMessage(await handler.getContactById('6281228020195@c.us'), { mentions: [await handler.getContactById(ids)] });
@@ -579,9 +579,15 @@ Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSay
             chat.sendMessage("Bentar...")
             const media = await m.downloadMedia();
             if (media.mimetype === 'image/jpeg' || media.mimetype === 'image/png') {
+              db.chat[dbIds].rpt.babu++;
               await m.reply("Nih Stiker")
               await chat.sendMessage(media, { mentions: [await handler.getContactById(ids)], sendMediaAsSticker: true, stickerAuthor: "SGStudio", stickerName: "Ai Botz|NaonBotz" })
-            }else {  db.chat[dbIds].rpt.botAngryLevel--; m.reply("Ini bukan Foto EGE") }
+              if(idSession > -1){
+                sessions[idSession].state = "trim"
+              }else {
+                sessions.push({"id": ids, "state": "trim"})
+              }
+            }else {  db.chat[dbIds].rpt.botAngryLevel++; m.reply("Ini bukan Foto EGE") }
           }else { 
             m.reply("Mana fotonya?");
             if(idSession > -1){
@@ -601,6 +607,7 @@ Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSay
             }else { await m.reply("Gw bukan admin :v") }
           };
         }else if(m.type === "chat"&&(mirip(text, "nama kamu siapa")||mirip(text, "nama mu siapa")||mirip(text, "nama lu siapa"))){
+          db.chat[dbIds].rpt.botAngryLevel--;
           await m.reply(`Hai, perkenalkan nama ku *${handler.info.pushname}*, aku adalah bot AI buatan *Syeif Sultoni Akbar*, Salam Kenal :)`)
         };
         
@@ -821,8 +828,14 @@ Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSay
           chat.sendMessage("Bentar...")
           const media = await m.downloadMedia();
           if (media.mimetype === 'image/jpeg' || media.mimetype === 'image/png') {
+            db.chat[dbIds].rpt.babu++;
             await m.reply("Nih Stiker")
             await chat.sendMessage(media, { mentions: [await handler.getContactById(ids)], sendMediaAsSticker: true, stickerAuthor: "SGStudio", stickerName: "Ai Botz|NaonBotz" })
+            if(idSession > -1){
+              sessions[idSession].state = "trim"
+            }else {
+              sessions.push({"id": ids, "state": "trim"})
+            }
           }else {  db.chat[dbIds].rpt.botAngryLevel--; m.reply("Ini bukan Foto EGE") }
         }else { 
           sessions[idSession].state = ""
