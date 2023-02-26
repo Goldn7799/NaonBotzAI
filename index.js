@@ -252,7 +252,7 @@ handler.on("message", async m =>{
           }
         }else if(text.substring(0, 2) === "oo"){
           m.reply(pickRandom["ohh", "ooo", "ooalah"])
-        }else if((similarity(text.split(" ")[1], "kontol") >= high||similarity(text.split(" ")[1], "asu") >= high||similarity(text.split(" ")[1], "bangsat") >= high||similarity(text.split(" ")[1], "gaje") >= high)&&text.split(" ")[0] === "bot"){
+        }else if((similarity(text.split(" ")[1], "kontol") >= high||similarity(text.split(" ")[1], "asu") >= high||similarity(text.split(" ")[1], "bangsat") >= high||similarity(text.split(" ")[1], "gaje") >= high||similarity(text.split(" ")[1], "anj") >= high)&&text.split(" ")[0] === "bot"){
           m.react(pickRandom(["😁", "😂", "🤗"]))
           db.chat[dbIds].rpt.toxic++;
           setTimeout(async ()=>{ db.chat[dbIds].rpt.bad++; }, 10)
@@ -507,6 +507,15 @@ Saya bisa promote/demote user di grup, bisa mengirim pesan balasan, bisa mencari
         }else if(text.match(RegExp("berantem yok".split("").join("\\w*").replace(/\W/, ""), "i"))){
           m.react("🤣");
           m.reply(pickRandom(["Yok!!", "HAYYUK!!", "AYO!!"]))
+        }else if(text.match(RegExp(".menu".split("").join("\\w*").replace(/\W/, ""), "i"))){
+          m.react("🤣");
+          m.reply("ketik aja 'Bisa Apa', gw udah ai ber iq 5 :V")
+        };
+        
+        ///2
+        if((await m._data.notifyName).toLocaleLowerCase().includes("bot")&&db.chat[dbIds].rpt.botAngryLevel >= 4){
+          chat.sendMessage(`Bot kok mainan bot :v *@${m._data.notifyName}*`, { mentions: [handler.getContactById(ids)] });
+          db.chat[dbIds].rpt.botAngryLevel -= 2;
         };
       }catch(e){
         await handler.sendMessage("6281228020195@c.us", `${await e}`)
