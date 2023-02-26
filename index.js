@@ -1,9 +1,10 @@
 const { Host } = require('./lib/connection.js')
 const { handler } = require("./lib/handler.js")
-const axios = require("axios")
-const cheerio = require('cheerio')
 const similarity = require("similarity")
 const fs = require("fs")
+const { googleIt, cnbindonesia } = require('@bochilteam/scraper')
+const { MessageMedia } = require('whatsapp-web.js')
+const request = require("request")
 
 let db = {};
 let sessions = [];
@@ -34,7 +35,7 @@ console.log("Connecting to WhatsApp...")
 Host.on("message_create", async mes =>{
   const chatsMe = await mes.getChat()
   if(mes.fromMe){
-    console.log(`Sent :: ${mes.from}(${chatsMe.name}) | ${handler.info.pushname} => ${(mes.type === "chat") ? mes.body : (mes.type === "sticker") ? "Stiker 😃" : (mes.type === "image") ? "Foto 📷" : (mes.type === "video") ? "Video 🎥" : (mes.type === "audio") ? "Audio 🔉" : (mes.type === "document") ? "Document 📃" : (mes.type === "location") ? "Lokasi 👆" : (mes.type === "contact") ? "Kontak 👤" : (mes.type === "ptt") ? "Pesan Suara 🎙" : (mes.type === "vcard") ? "VCard 📇" : "IDK ❓"}`)
+    console.log(`Sent :: ${mes.from}(${chatsMe.name}) | ${Host.info.pushname} => ${(mes.type === "chat") ? mes.body : (mes.type === "sticker") ? "Stiker 😃" : (mes.type === "image") ? "Foto 📷" : (mes.type === "video") ? "Video 🎥" : (mes.type === "audio") ? "Audio 🔉" : (mes.type === "document") ? "Document 📃" : (mes.type === "location") ? "Lokasi 👆" : (mes.type === "contact") ? "Kontak 👤" : (mes.type === "ptt") ? "Pesan Suara 🎙" : (mes.type === "vcard") ? "VCard 📇" : "IDK ❓"}`)
   };
 })
 Host.on("message", async m =>{
@@ -70,6 +71,20 @@ Host.on("message", async m =>{
   };
 })
 
+// Host.on('groupInviteLinkCreated', (chat, inviteLink, creator) => {
+//   let gId, lId;
+//   db.group.map(dtss =>{
+//     if (dtss.id === chat){
+//       gId = lId;
+//     };
+//     lId++;
+//   })
+//   db.group[gId].link = {
+//     "data": inviteLink,
+//     "author": creator
+//   }
+// });
+
 const saveData = ()=>{
   setTimeout(() => {
     fs.writeFile("./database.json", JSON.stringify(db), (err)=>{
@@ -93,6 +108,13 @@ const mirip = (left, right)=>{
     return left.match(RegExp(right.split("").join("\\w*").replace(/\W/, ""), "i"))
   }else { return "err mirip" }
 }
+const downloadImage = (url, filename, callback) => {
+  request.head(url, (err, res, body) => {
+    request(url)
+      .pipe(fs.createWriteStream(filename))
+      .on('close', callback);
+  });
+};
 
 //main
 handler.on("message", async m =>{
@@ -114,6 +136,7 @@ handler.on("message", async m =>{
     let isAdminGroup, isMentionAdmin, isMentionOwner, isMeAdmin;
     let idSession, i= 0;
     let dbIds = 0, dis = 0;
+    let gcDbIds = 0, gcIds = 0;
     sessions.map(dts =>{
       if(dts.id === ids){
         idSession = i;
@@ -137,6 +160,12 @@ handler.on("message", async m =>{
           isMeAdmin = true;
         };
       }
+      db.group.map(dtss =>{
+        if (dtss.id === m.from){
+          gcDbIds = gcIds
+        };
+        gcIds++;
+      })
     };
     if(mention){
       if(mention.isMe){
@@ -240,24 +269,38 @@ handler.on("message", async m =>{
         //   m.react("🤣")
         // }
         else if (((similarity(text.split(" ")[0], "cara") >= high||similarity(text.split(" ")[0], "caranya") >= high||similarity(text.split(" ")[0], "apaitu") >= high)&&text.split(" ")[1])||(((similarity(text.split(" ")[0], "bagaimana") >= high||similarity(text.split(" ")[0], "gimana") >= high)&&(similarity(text.split(" ")[1], "cara") >= high||similarity(text.split(" ")[1], "caranya") >= high))&&text.split(" ")[1]&&text.split(" ")[2])){
-          const searchUrl = `https://www.google.com/search?q=${text.replace(/\s+/g, '+')}`;
+          // const searchUrl = `https://www.google.com/search?q=${text.replace(/\s+/g, '+')}`;
           db.chat[dbIds].rpt.good++;
-          axios.get(searchUrl)
-          .then(response => {
-            const $ = cheerio.load(response.data);
-            const searchResult = $('div.g').first().find('div.s').text(); // ambil teks dari div pertama hasil pencarian
-            const result = searchResult.replace(/\.$/, ''); // hapus tanda titik di akhir kalimat
-            // console.log(result); // tampilkan hasil pencarian tanpa tanda titik
-            if(result){
-              m.reply(`Kalau kata mbah google : ${result}`);
-            }else {
-              m.reply("tidak ada hasil yang tepat di google tentang "+text)
-            }
-          })
-          .catch(error => {
-            console.log(error);
-            m.reply("Tidak dapat mengambil info dari google, coba lagi nanti :v")
-          });
+          // import { googleIt } from '@bochilteam/scraper'
+          const fetch = (await import('node-fetch')).default
+          // let full = /f$/i.test(command)
+          // if (!text) return conn.reply(m.chat, 'Tidak ada teks untuk di cari', m)
+          let url = 'https://google.com/search?q=' + encodeURIComponent(text)
+          let search = await googleIt(text)
+          let msg = search.articles.map(({
+              // header,
+              title,
+              url,
+              description
+          }) => {
+              return `*${title}*\n_${url}_\n_${description}_`
+          }).join('\n\n')
+          m.reply(msg)
+        }else if(similarity(text, "news") >= 0.9||similarity(text, "berita hari ini") >= high||similarity(text, "berita terkini") >= high){
+          const result = await cnbindonesia();
+          db.chat[dbIds].rpt.good++;
+          if(result){
+            m.reply("Tunggu sebentar ...")
+            downloadImage(result[0].image, './tmp/news.png', async ()=>{
+              const medias = await MessageMedia.fromFilePath("./tmp/news.png");
+              if(medias){
+                await chat.sendMessage(medias, { mentions: [await handler.getContactById(ids)] });
+                await chat.sendMessage(`*${result[0].title}*\n${result[0].date}\n\n${result[0].link}`, { mentions: [await handler.getContactById(ids)] })
+              }else{ m.reply("terjadi kesalahan") }
+            })
+          }else {
+            m.reply("Tidak ada berita hari ini")
+          }
         }else if (text === "p"){
           m.reply(pickRandom(["Salam deck", "minimal salam lah", "setidak nya salam", "pa pe pa pe"]))
           db.chat[dbIds].rpt.bad++;
@@ -509,12 +552,12 @@ handler.on("message", async m =>{
             m.reply("Pastikan anda berada dalam grup")
           }
         }else if(similarity(text, "lu bisa apa saja") >= medium||similarity(text, "kamu bisa apa saja") >= medium||similarity(text, "lu bisa apa") >= medium||similarity(text, "kamu bisa apa") >= medium){
-          m.react("😁");
-          m.reply(`
-Saya bisa promote/demote user di grup, bisa mengirim pesan balasan, bisa mencari orang random, bisa mencari paling(random) dengan kata kunci, siapa yang paling <ACTION>, saya bisa membalas chat anda, saya bisa marah, memahami sifat seseorang, memahami kebiasaan
+          await m.react("😁");
+          await m.reply(`
+Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSaya bisa *pilih orang random*,\nSaya bisa mencari paling(random) dengan kata kunci *siapa yang paling*,\nSaya bisa *buatin stiker*,\nSaya bisa memberi tahu *berita terkini*,\nSaya bisa membalas chat anda,\nSaya bisa marah, memahami sifat seseorang, memahami kebiasaan
           `)
-          chat.sendMessage("Jika butuh bantuan silahkan hubungi owner :), AI ini masih dalam tahap pengembangan :v", { mentions: [await handler.getContactById(ids)] });
-          chat.sendMessage(await handler.getContactById('6281228020195@c.us'), { mentions: [await handler.getContactById(ids)] });
+          await chat.sendMessage("Jika butuh bantuan silahkan hubungi owner :), AI ini masih dalam tahap pengembangan :v", { mentions: [await handler.getContactById(ids)] });
+          await chat.sendMessage(await handler.getContactById('6281228020195@c.us'), { mentions: [await handler.getContactById(ids)] });
         }else if(similarity(text, "pilih orang random") >= medium){
           if(chat.isGroup){
             let userList = [];
@@ -531,24 +574,33 @@ Saya bisa promote/demote user di grup, bisa mengirim pesan balasan, bisa mencari
         }else if(text.match(RegExp(".menu".split("").join("\\w*").replace(/\W/, ""), "i"))){
           m.react("🤣");
           m.reply("ketik aja 'Lu Bisa Apa', gw bot ai beriq 5 :V")
-        }
-        // else if(similarity(text, "buatin stiker") >= medium||similarity(text, "buatin stiker dong") >= medium){
-        //   if(m.hasMedia){
-        //     chat.sendMessage("Bentar...")
-        //     const media = await m.downloadMedia();
-        //     if (media.mimetype === 'image/jpeg' || media.mimetype === 'image/png') {
-        //       fs.writeFile("./tmp/sticker.png", media.data, (err)=>{
-        //         if(err){
-        //           m.reply(err)
-        //         }else {
-        //           const sticker = MessageMedia.fromFilePath('./tmp/sticker.png');
-        //           chat.sendMessage(sticker, { sendMediaAsSticker: true });
-        //         }
-        //       })
-        //     }else {  db.chat[dbIds].rpt.botAngryLevel--; m.reply("Ini bukan stiker EGE") }
-        //   }else { m.reply("Mana fotonya?") }
-        // }
-        ;
+        }else if(similarity(text, "buatin stiker") >= medium||similarity(text, "buatin stiker dong") >= medium){
+          if(m.hasMedia){
+            chat.sendMessage("Bentar...")
+            const media = await m.downloadMedia();
+            if (media.mimetype === 'image/jpeg' || media.mimetype === 'image/png') {
+              await m.reply("Nih Stiker")
+              await chat.sendMessage(media, { mentions: [await handler.getContactById(ids)], sendMediaAsSticker: true, stickerAuthor: "SGStudio", stickerName: "Ai Botz|NaonBotz" })
+            }else {  db.chat[dbIds].rpt.botAngryLevel--; m.reply("Ini bukan Foto EGE") }
+          }else { 
+            m.reply("Mana fotonya?");
+            if(idSession > -1){
+              sessions[idSession].state = "stkr"
+            }else {
+              sessions.push({"id": ids, "state": "stkr"})
+            }
+          }
+        }else if(similarity(text, "minta link grup") >= 0.85){
+          if(chat.isGroup){
+            if(isMeAdmin){
+              if(db.group[gcDbIds].link){
+                await m.reply(`Nih,\ndari ${db.group[gcDbIds].link.author}\n${db.group[gcIds].link.data}`)
+              }else {
+                await m.reply("Link grup tidak tersedia :(")
+              }
+            }else { await m.reply("Gw bukan admin :v") }
+          };
+        };
         
         // ///2
         // if((await m._data.notifyName).toLocaleLowerCase().includes("bot")&&db.chat[dbIds].rpt.botAngryLevel >= 4){
@@ -759,6 +811,19 @@ Saya bisa promote/demote user di grup, bisa mengirim pesan balasan, bisa mencari
         }else {
           sessions[idSession].state = "";
           sessions[idSession].currentCommand = "";
+          next()
+        }
+      }else if(state === "stkr"){
+        if(m.hasMedia){
+          sessions[idSession].state = ""
+          chat.sendMessage("Bentar...")
+          const media = await m.downloadMedia();
+          if (media.mimetype === 'image/jpeg' || media.mimetype === 'image/png') {
+            await m.reply("Nih Stiker")
+            await chat.sendMessage(media, { mentions: [await handler.getContactById(ids)], sendMediaAsSticker: true, stickerAuthor: "SGStudio", stickerName: "Ai Botz|NaonBotz" })
+          }else {  db.chat[dbIds].rpt.botAngryLevel--; m.reply("Ini bukan Foto EGE") }
+        }else { 
+          sessions[idSession].state = ""
           next()
         }
       }else { 

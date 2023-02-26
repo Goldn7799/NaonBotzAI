@@ -1,6 +1,6 @@
 {
   "name": "naon-botz",
-  "version": "1.2.3",
+  "version": "1.3.5",
   "description": "A whatsapp bots",
   "main": "index.js",
   "scripts": {
@@ -20,12 +20,14 @@
   },
   "homepage": "https://github.com/Goldn7799/NaonBotz#readme",
   "dependencies": {
+    "@bochilteam/scraper": "^4.0.22-alpha.0",
     "axios": "^1.3.4",
     "cheerio": "^1.0.0-rc.12",
     "fs": "^0.0.1-security",
     "node-fetch": "^3.3.0",
     "path": "^0.12.7",
     "qrcode-terminal": "^0.12.0",
+    "request": "^2.88.2",
     "sharp": "^0.31.3",
     "similarity": "^1.2.1",
     "whatsapp-web.js": "^1.19.4"
