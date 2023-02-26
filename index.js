@@ -196,7 +196,7 @@ handler.on("message", async m =>{
               sessions.push({"id": ids, "state": "woireac"})
             }
           }
-        }else if (similarity((text.split(" ")[0]+" "+text.split(" ")[1]), 'lagi apa') >= medium||similarity((text.split(" ")[0]+" "+text.split(" ")[1]), 'lagi ngapain') >= medium){
+        }else if (similarity((text.split(" ")[0]+" "+text.split(" ")[1]), 'lagi apa') >= high||similarity((text.split(" ")[0]+" "+text.split(" ")[1]), 'lagi ngapain') >= high){
           m.reply(pickRandom(['Lagi turu', 'rebahan', 'mbangkong']))
           db.chat[dbIds].rpt.botAngryLevel--;
           if(idSession > -1){
@@ -251,7 +251,7 @@ handler.on("message", async m =>{
             sessions.push({"id": ids, "state": "pe"})
           }
         }else if(text.substring(0, 2) === "oo"){
-          m.reply(pickRandom["ohh", "ooo", "ooalah"])
+          m.reply(pickRandom(["ohh", "ooo", "ooalah"]))
         }else if((similarity(text.split(" ")[1], "kontol") >= high||similarity(text.split(" ")[1], "asu") >= high||similarity(text.split(" ")[1], "bangsat") >= high||similarity(text.split(" ")[1], "gaje") >= high||similarity(text.split(" ")[1], "anj") >= high)&&text.split(" ")[0] === "bot"){
           m.react(pickRandom(["😁", "😂", "🤗"]))
           db.chat[dbIds].rpt.toxic++;
