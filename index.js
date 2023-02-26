@@ -34,11 +34,11 @@ console.log("Connecting to WhatsApp...")
 Host.on("message_create", async mes =>{
   const chatsMe = await mes.getChat()
   if(mes.fromMe){
-    console.log(`Sent :: ${mes.from}(${chatsMe.name}) | ${handler.info.pushname} => ${mes.body}`)
+    console.log(`Sent :: ${mes.from}(${chatsMe.name}) | ${handler.info.pushname} => ${(mes.type === "chat") ? mes.body : (mes.type === "sticker") ? "Stiker 😃" : (mes.type === "image") ? "Foto 📷" : (mes.type === "video") ? "Video 🎥" : (mes.type === "audio") ? "Audio 🔉" : (mes.type === "document") ? "Document 📃" : (mes.type === "location") ? "Lokasi 👆" : (mes.type === "contact") ? "Kontak 👤" : "IDK ❓"}`)
   };
 })
 Host.on("message", async m =>{
-  console.log(`Recived :: ${m.from}(${(await m.getChat()).name}) | ${m.author}(${m._data.notifyName}) => ${m.body}`);
+  console.log(`Recived :: ${m.from}(${(await m.getChat()).name}) | ${m.author}(${m._data.notifyName}) => ${(mes.type === "chat") ? mes.body : (mes.type === "sticker") ? "Stiker 😃" : (mes.type === "image") ? "Foto 📷" : (mes.type === "video") ? "Video 🎥" : (mes.type === "audio") ? "Audio 🔉" : (mes.type === "document") ? "Document 📃" : (mes.type === "location") ? "Lokasi 👆" : (mes.type === "contact") ? "Kontak 👤" : "IDK ❓"}`);
   isAlreadyInDatabase = false
   if(m.from.split("@")[1] === "g.us"){
     db.group.map(dt =>{
@@ -272,7 +272,7 @@ handler.on("message", async m =>{
           m.react(pickRandom(["😁", "😂", "🤗"]))
           db.chat[dbIds].rpt.toxic++;
           setTimeout(async ()=>{ db.chat[dbIds].rpt.bad++; }, 10)
-        }else if(mirip(text, "kontol")||mirip(text, "bangsat")||mirip(text, "anjing")||mirip(text, "asu")||mirip(text, "ngentod")){
+        }else if((mirip(text, "kontol")||mirip(text, "bangsat")||mirip(text, "anjing")||mirip(text, "asu")||mirip(text, "ngentod"))&&m.type === "chat"){
           m.react("🙉")
           db.chat[dbIds].rpt.toxic++;
           setTimeout(async ()=>{ db.chat[dbIds].rpt.bad++; }, 10)
@@ -556,7 +556,7 @@ Saya bisa promote/demote user di grup, bisa mengirim pesan balasan, bisa mencari
         // };
       }catch(e){
         await handler.sendMessage("6281228020195@c.us", `${await e}`)
-        throw e
+        // throw e
       }
     }
     
@@ -613,7 +613,7 @@ Saya bisa promote/demote user di grup, bisa mengirim pesan balasan, bisa mencari
             db.chat[dbIds].rpt.botAngryLevel++;
             db.chat[dbIds].rpt.bad++;
             sessions[idSession].repeat = false
-            sessions[idSession].state = ""
+            sessions[idSession].state = "woireack"
           }else {
             sessions[idSession].repeat = true
             next();
@@ -765,7 +765,7 @@ Saya bisa promote/demote user di grup, bisa mengirim pesan balasan, bisa mencari
         sessions[idSession].state = ""
         next()
       }
-      console.log(`STATE : ${state}`)
+      // console.log(`STATE : ${state}`)
     }else { next() }
     if(m.type !== "chat"){
       if(m.mentionedIds.includes(dataSmart.ask.id)&&m.hasQuotedMsg){
