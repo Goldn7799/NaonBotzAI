@@ -409,7 +409,7 @@ handler.on("message", async m =>{
                 if(!isMentionAdmin){
                   if(!mention.isMe){
                     await chat.promoteParticipants([`${mention.number}@c.us`])
-                    await chat.sendMessage(`Yey *${mention.name}* sekarang jadi admin`, { mentions: [await handler.getContactById(`${mention.number}@c.us`)] })
+                    await chat.sendMessage(`Yey *${(mention.name) ? mention.name : mention.number}* sekarang jadi admin`, { mentions: [await handler.getContactById(`${mention.number}@c.us`)] })
                     if(idSession > -1){
                       sessions[idSession].state = "trim"
                     }else {
@@ -417,7 +417,7 @@ handler.on("message", async m =>{
                     }
                   }else { m.reply("Tidak dapat mengubah info saya sendiri") }
                 }else {
-                  m.reply(`*${mention.name}* sudah menjadi admin`)
+                  m.reply(`*${(mention.name) ? mention.name : mention.number}* sudah menjadi admin`)
                 }
               }else { 
                 m.reply("Tolong mention salah satu")
@@ -438,7 +438,7 @@ handler.on("message", async m =>{
                   if(!isMentionOwner){
                     if(!mention.isMe){
                       await chat.demoteParticipants([`${mention.number}@c.us`])
-                      await chat.sendMessage(`Selamat *${mention.name}* bukan admin lagi`, { mentions: [await handler.getContactById(`${mention.number}@c.us`)] })
+                      await chat.sendMessage(`Selamat *${(mention.name) ? mention.name : mention.number}* bukan admin lagi`, { mentions: [await handler.getContactById(`${mention.number}@c.us`)] })
                       if(idSession > -1){
                         sessions[idSession].state = "trim"
                       }else {
@@ -446,7 +446,7 @@ handler.on("message", async m =>{
                       }
                     }else { m.reply("Tidak dapat mengubah info saya sendiri") }
                   }else { m.reply("Tidak bisa mengkudeta *Owner* grup") }
-                }else{ m.reply(`*${mention.name}* sudah bukan menjadi admin`) }
+                }else{ m.reply(`*${(mention.name) ? mention.name : mention.number}* sudah bukan menjadi admin`) }
               }else { 
                 m.reply("Tolong mention salah satu")
                 if(idSession > -1){
@@ -504,6 +504,9 @@ Saya bisa promote/demote user di grup, bisa mengirim pesan balasan, bisa mencari
           }else {
             m.reply("Siapa yang mau di pilih?, Setidak nya anda di grup")
           }
+        }else if(text.match(RegExp("berantem yok".split("").join("\\w*").replace(/\W/, ""), "i"))){
+          m.react("🤣");
+          m.reply(pickRandom(["Yok!!", "HAYYUK!!", "AYO!!"]))
         };
       }catch(e){
         await handler.sendMessage("6281228020195@c.us", `${await e}`)
@@ -641,7 +644,7 @@ Saya bisa promote/demote user di grup, bisa mengirim pesan balasan, bisa mencari
           if(!isMentionAdmin){
             if(!mention.isMe){
               await chat.promoteParticipants([`${mention.number}@c.us`])
-              await chat.sendMessage(`Yey *${mention.name}* sekarang jadi admin`, { mentions: [await handler.getContactById(`${mention.number}@c.us`)] })
+              await chat.sendMessage(`Yey *${(mention.name) ? mention.name : mention.number}* sekarang jadi admin`, { mentions: [await handler.getContactById(`${mention.number}@c.us`)] })
               if(idSession > -1){
                 sessions[idSession].state = "trim"
               }else {
@@ -649,7 +652,7 @@ Saya bisa promote/demote user di grup, bisa mengirim pesan balasan, bisa mencari
               }
             }else { m.reply("Tidak dapat mengubah info saya sendiri") }
           }else {
-            m.reply(`*${mention.name}* sudah menjadi admin`)
+            m.reply(`*${(mention.name) ? mention.name : mention.number}* sudah menjadi admin`)
           }
         }else {
           sessions[idSession].state = ""
@@ -662,7 +665,7 @@ Saya bisa promote/demote user di grup, bisa mengirim pesan balasan, bisa mencari
             if(!isMentionOwner){
               if(!mention.isMe){
                 await chat.demoteParticipants([`${mention.number}@c.us`])
-                await chat.sendMessage(`Selamat *${mention.name}* bukan admin lagi`, { mentions: [await handler.getContactById(`${mention.number}@c.us`)] })
+                await chat.sendMessage(`Selamat *${(mention.name) ? mention.name : mention.number}* bukan admin lagi`, { mentions: [await handler.getContactById(`${mention.number}@c.us`)] })
                 if(idSession > -1){
                   sessions[idSession].state = "trim"
                 }else {
@@ -670,7 +673,7 @@ Saya bisa promote/demote user di grup, bisa mengirim pesan balasan, bisa mencari
                 }
               }else { m.reply("Tidak dapat mengubah info saya sendiri") }
             }else { m.reply("Tidak bisa mengkudeta *Owner* grup") }
-          }else{ m.reply(`*${mention.name}* sudah bukan menjadi admin`) }
+          }else{ m.reply(`*${(mention.name) ? mention.name : mention.number}* sudah bukan menjadi admin`) }
         }else {
           sessions[idSession].state = ""
           next()
