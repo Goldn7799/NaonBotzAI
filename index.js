@@ -31,7 +31,7 @@ Host.on("message", async m =>{
       }
     })
     if(!isUserAlreadyInDatabase){
-      db.chat.push({"id": m.author, "isBlocked": false, "name": m._data.notifyName, "good": 0, "bad": 0, "babu": 0, "badToxic": 0, "badBego": 0, "goodSeru": 0, "wibu": 0, "ngetag": 0, "cewe": 0, "spam": {"cout": 0, "word": []}})
+      db.chat.push({"id": m.author, "isBlocked": false, "name": m._data.notifyName, "rpt": { "good": 0, "bad": 0, "babu": 0, "toxic": 0, "badBego": 0, "goodSeru": 0, "wibu": 0, "ngetag": 0, "cewe": 0, "spam": {"cout": 0, "word": []}, "botAngryLevel": 0, "userAngryLevel": 0}})
     };
   }else if(m.from.split("@")[1] === "c.us"){
     db.chat.map(dt =>{
@@ -40,7 +40,7 @@ Host.on("message", async m =>{
       }
     })
     if(!isAlreadyInDatabase){
-      db.chat.push({"id": m.from, "isBlocked": false, "name": m._data.notifyName, "good": 0, "bad": 0, "babu": 0, "badToxic": 0, "badBego": 0, "goodSeru": 0, "wibu": 0, "ngetag": 0, "cewe": 0, "spam": {"cout": 0, "word": []}})
+      db.chat.push({"id": m.from, "isBlocked": false, "name": m._data.notifyName, "rpt": {"good": 0, "bad": 0, "babu": 0, "toxic": 0, "badBego": 0, "goodSeru": 0, "wibu": 0, "ngetag": 0, "cewe": 0, "spam": {"cout": 0, "word": []}, "botAngryLevel": 0, "userAngryLevel": 0}})
     };
   };
 })
@@ -106,7 +106,7 @@ handler.on("message", async m =>{
   };
   if(mention){
     if(mention.isMe){
-      db.chat[dbIds].ngetag += 1;
+      db.chat[dbIds].rpt.ngetag++;
     };
     if (chat.isGroup){
       ownerNumber = await chat.groupMetadata.owner.user;
@@ -126,30 +126,23 @@ handler.on("message", async m =>{
   let medium = 0.65;
   let low = 0.55;
   let idSession, i= 0;
-  let dbIds, di=0;
+  let dbIds, dis = 0;
   sessions.map(dts =>{
     if(dts.id === ids){
       idSession = i;
     };
     i++
   });
-  db.chat.map(dts=>{
-    if(chat.isGroup){
-      if(m.author === dts.id){
-        dbIds = di;
-      };
-    }else {
-      if(m.from === dts.id){
-        dbIds = di;
-      }
-    }
-    di++;
+  db.chat.map(async dat=>{
+    if(dat.id === ids){
+      dbIds = dis;
+    };
+    dis++;
   })
-  
   const next = async ()=>{
     if(similarity(text.split(" ")[0], "halo") >= 0.9||similarity(text.split(" ")[0], "hai") >= 0.9){
       const hWord = pickRandom([`Halo juga ${names}`, `Hai ${names}`, `Apa kabar ${names}`])
-      db.chat[dbIds].good += 1;
+      db.chat[dbIds].rpt.good++;
       if(hWord.includes("Apa kabar")){
         if(idSession > -1){
           sessions[idSession].state = "apkbr"
@@ -166,7 +159,8 @@ handler.on("message", async m =>{
     // }
     else if(similarity(text.split(" ")[0], "apakabar") >= medium||similarity(text.split(" ")[0], "apa kabar") >= medium){
       m.react("👍")
-      db.chat[dbIds].good += 1;
+      db.chat[dbIds].rpt.botAngryLevel--;
+      db.chat[dbIds].rpt.good++;
       let apWord = pickRandom(["Aman", "Baik", `Saya baik baik saja ${names}`, `Baik ${names}, kamu gimana?`]);
       if(apWord.includes("kamu gimana?")){
         if(idSession > -1){
@@ -178,12 +172,13 @@ handler.on("message", async m =>{
       m.reply(apWord)
     }else if(similarity(text.split(" ")[0], "oke") >= high){
       m.react("😉")
-      db.chat[dbIds].good += 1;
+      db.chat[dbIds].rpt.good++;
     }else if (similarity(text.split(" ")[0], "woi") >= high){
       let txt = pickRandom(["Apaan", "affah", "HAH?", "Naon", "Opo seh", "apa ajg"])
-      db.chat[dbIds].bad += 1;
+      db.chat[dbIds].rpt.bad++;
       m.reply(txt)
       if(txt.includes("ajg")){
+        db.chat[dbIds].rpt.botAngryLevel++;
         if(idSession > -1){
           sessions[idSession].state = "woireack"
         }else {
@@ -198,6 +193,7 @@ handler.on("message", async m =>{
       }
     }else if (similarity((text.split(" ")[0]+" "+text.split(" ")[1]), 'lagi apa') >= medium||similarity((text.split(" ")[0]+" "+text.split(" ")[1]), 'lagi ngapain') >= medium){
       m.reply(pickRandom(['Lagi turu', 'rebahan', 'mbangkong']))
+      db.chat[dbIds].rpt.botAngryLevel--;
       if(idSession > -1){
         sessions[idSession].state = "rbhn"
       }else {
@@ -205,9 +201,10 @@ handler.on("message", async m =>{
       }
     }else if(similarity(text.split(" ")[0], "masa") >= high||similarity(text.split(" ")[0], "mosok") >= high||similarity(text.split(" ")[0], "affaiyah") >= high){
       let txt = pickRandom(['iya', 'y', 'iya ajg'])
-      db.chat[dbIds].bad += 1;
+      db.chat[dbIds].rpt.bad++;
       m.reply(txt)
       if(txt.includes("ajg")){
+        db.chat[dbIds].rpt.botAngryLevel++;
         if(idSession > -1){
           sessions[idSession].state = "woireack"
         }else {
@@ -222,7 +219,7 @@ handler.on("message", async m =>{
     // }
     else if (((similarity(text.split(" ")[0], "cara") >= high||similarity(text.split(" ")[0], "caranya") >= high||similarity(text.split(" ")[0], "apaitu") >= high)&&text.split(" ")[1])||(((similarity(text.split(" ")[0], "bagaimana") >= high||similarity(text.split(" ")[0], "gimana") >= high)&&(similarity(text.split(" ")[1], "cara") >= high||similarity(text.split(" ")[1], "caranya") >= high))&&text.split(" ")[1]&&text.split(" ")[2])){
       const searchUrl = `https://www.google.com/search?q=${text.replace(/\s+/g, '+')}`;
-      db.chat[dbIds].good += 1;
+      db.chat[dbIds].rpt.good++;
       axios.get(searchUrl)
       .then(response => {
         const $ = cheerio.load(response.data);
@@ -241,7 +238,8 @@ handler.on("message", async m =>{
       });
     }else if (text === "p"){
       m.reply(pickRandom(["Salam deck", "minimal salam lah", "setidak nya salam", "pa pe pa pe"]))
-      db.chat[dbIds].bad += 1;
+      db.chat[dbIds].rpt.bad++;
+      db.chat[dbIds].rpt.botAngryLevel += 2;
       if(idSession > -1){
         sessions[idSession].state = "pe"
       }else {
@@ -251,14 +249,14 @@ handler.on("message", async m =>{
       m.reply(pickRandom["ohh", "ooo", "ooalah"])
     }else if((similarity(text.split(" ")[1], "kontol") >= high||similarity(text.split(" ")[1], "asu") >= high||similarity(text.split(" ")[1], "bangsat") >= high||similarity(text.split(" ")[1], "gaje") >= high)&&text.split(" ")[0] === "bot"){
       m.react(pickRandom(["😁", "😂", "🤗"]))
-      db.chat[dbIds].badToxic += 1;
-      db.chat[dbIds].bad += 1;
+      db.chat[dbIds].rpt.toxic++;
+      setTimeout(async ()=>{ db.chat[dbIds].rpt.bad++; }, 10)
     }else if(text.includes("kontol")||text.includes("bangsat")||text.includes("anjing")||text.includes("asu")){
       m.react("🙉")
-      db.chat[dbIds].badToxic += 1;
-      db.chat[dbIds].bad += 1;
+      db.chat[dbIds].rpt.toxic++;
+      setTimeout(async ()=>{ db.chat[dbIds].rpt.bad++; }, 10)
     }else if (similarity(text.split(" ")[0], "berapa") >= high&&text.split(" ")[2]){
-      db.chat[dbIds].good += 1;
+      db.chat[dbIds].rpt.good++;
       try {
         if(similarity(text.split(" ")[2], "ditambah") >= high||text.split(" ")[2] === "+"){
           let result = parseInt(text.split(" ")[1]) + parseInt(text.split(" ")[3])
@@ -274,7 +272,8 @@ handler.on("message", async m =>{
           m.reply(`Hasil dari ${text.split(" ")[1]} / ${text.split(" ")[3]} = ${result}`); 
         }else {
           m.reply("di apain ege, ditambah, dikali, dikurang atau di apa")
-          db.chat[dbIds].badBego += 1;
+          db.chat[dbIds].rpt.badBego++;
+          db.chat[dbIds].rpt.botAngryLevel++;
           if(idSession > -1){
             sessions[idSession].state = "jmlh"
           }else {
@@ -288,15 +287,17 @@ handler.on("message", async m =>{
       m.reply(pickRandom(["Ohh", "oo", "ohh kirain", "walah"]))
     }else if(similarity(text.split(" ")[0], "hoax") >= high||similarity(text.split(" ")[0], "halah") >= high){
       m.react("😂")
-      db.chat[dbIds].goodSeru += 1;
+      db.chat[dbIds].rpt.goodSeru++;
     }else if(text.includes("saya cewe")||text.includes("gw cewe")||text.includes("aku cewe")){
       m.react(pickRandom(["😀", "😍", "🥰", "😜"]))
-      db.chat[dbIds].cewe += 1;
+      db.chat[dbIds].rpt.cewe++;
+      db.chat[dbIds].rpt.botAngryLevel -= 3;
     }else if(similarity(text, "kamu nanyea") >= medium){
-      db.chat[dbIds].bad += 1;
+      db.chat[dbIds].rpt.bad++;
       let txt = pickRandom(["IYAA", "HOOH", "IYA AJG"])
       m.reply(txt)
       if(txt.includes("ajg")){
+        db.chat[dbIds].rpt.botAngryLevel++;
         if(idSession > -1){
           sessions[idSession].state = "woireack"
         }else {
@@ -305,17 +306,18 @@ handler.on("message", async m =>{
       };
     }else if(text.includes("orang mana")){
       m.reply(pickRandom(["orang mars", "Aku orang mars kak", "aku orang bumi", "aku orang isekai"]))
-      db.chat[dbIds].good += 1;
+      db.chat[dbIds].rpt.good++;
     }else if(text.includes("om om")){
       m.react(pickRandom(["😏", "😒", "🙃", "😵", "🤨"]))
     }else if (text.includes("isekai")){
       m.reply(pickRandom(["WIBUU", "DASAR WIBU"]))
-      db.chat[dbIds].wibu += 1;
+      db.chat[dbIds].rpt.wibu++;
     }else if(similarity(text, "kamu bot?") >= medium||similarity(text, "lu bot?") >= medium){
       let txt = pickRandom(["Iyaa", "Hooh", "Iya gw bot", "Lu kira gw apaan?, Babi?"])
-      db.chat[dbIds].bad += 1;
+      db.chat[dbIds].rpt.bad++;
       m.reply(txt)
       if(txt.includes("Lu kira gw apaan?")){
+        db.chat[dbIds].rpt.botAngryLevel++;
         if(idSession > -1){
           sessions[idSession].state = "lkgpn"
         }else {
@@ -333,7 +335,8 @@ handler.on("message", async m =>{
         }
       };
     }else if(similarity(text, "keren kaga") >= medium||similarity(text, "keren kan") >= medium){
-      db.chat[dbIds].good += 1;
+      db.chat[dbIds].rpt.good++;
+      db.chat[dbIds].rpt.botAngryLevel--;
       m.reply(pickRandom(["GG", "Bagus bet", "Keren Banget"]))
       if(idSession > -1){
         sessions[idSession].state = "trim"
@@ -343,16 +346,19 @@ handler.on("message", async m =>{
     }else if(similarity(text.split(" ")[0], "siapa") >= high&&(text.includes("pencipta")||text.includes("pembuat")||text.includes("owner"))&&(similarity(text.split(" ").pop(), "mu") >= high||similarity(text.split(" ").pop(), "kamu") >= high)){
       m.reply("Saya diciptakan oleh Syeif Sultoni Akbar menggunakkan NODEJS, similarity dan whatsapp-web.js");
       chat.sendMessage(await handler.getContactById('6281228020195@c.us'))
-      db.chat[dbIds].good += 1;
+      db.chat[dbIds].rpt.good++;
+      db.chat[dbIds].rpt.botAngryLevel -= 2;
     }else if(similarity(text, "apa pekerjaan mu") >= low){
       m.reply(pickRandom(["Makan, Tidur doang", "Pengganguran", "Turu", "Rebahan"]))
     }else if(await m.mentionedIds.includes(await handler.info.me.user)){
       m.reply(pickRandom(["Apaan?", "Ada apa?", "Affah?", "Ngapain ngetag?"]))
-      db.chat[dbIds].ngetag += 1;
+      db.chat[dbIds].rpt.ngetag++;
+      db.chat[dbIds].rpt.botAngryLevel++;
     }else if (similarity(text, "assalamualaikum") >= medium){
       m.reply("Waalaikumsalam")
+      db.chat[dbIds].rpt.botAngryLevel -= 2;
     }else if(similarity(text, "buka grup") >= high){
-      db.chat[dbIds].babu += 1;
+      db.chat[dbIds].rpt.babu++;
       if(chat.isGroup){
           if(isAdminGroup){
             chat.setMessagesAdminsOnly(false)
@@ -369,7 +375,7 @@ handler.on("message", async m =>{
         m.reply("Pastikan anda di dalam grup")
       }
     }else if(similarity(text, "tutup grup") >= high){
-      db.chat[dbIds].babu += 1;
+      db.chat[dbIds].rpt.babu++;
       if(chat.isGroup){
         if(isAdminGroup){
             chat.setMessagesAdminsOnly(true)
@@ -387,9 +393,11 @@ handler.on("message", async m =>{
       }
     }else if (similarity(text, "keren") >= medium){
       m.reply(pickRandom(["Trimakasih", "Makasih"]))
+      db.chat[dbIds].rpt.botAngryLevel -= 2;
+      db.chat[dbIds].rpt.good++;
       m.react("😘")
     }else if (similarity(text.split(" ")[0], "promote") >= high){
-      db.chat[dbIds].babu += 1;
+      db.chat[dbIds].rpt.babu++;
       if(chat.isGroup){
         if(isAdminGroup){
           if(mention){
@@ -417,7 +425,7 @@ handler.on("message", async m =>{
         }else { m.reply("Anda bukan admin") }
       }else { m.reply("Pastikan anda di dalam grup") }
     }else if (similarity(text.split(" ")[0], "demote") >= high){
-      db.chat[dbIds].babu += 1;
+      db.chat[dbIds].rpt.babu++;
       if(chat.isGroup){
         if(isAdminGroup){
           if(mention){
@@ -453,8 +461,9 @@ handler.on("message", async m =>{
         sessions[idSession].currentCount++;
         if(sessions[idSession].currentCount >= 5){
           sessions[idSession].currentCount = 0;
-          db.chat[dbIds].spam.word.push(text);
-          db.chat[dbIds].spam.word.cout++;;
+          db.chat[dbIds].rpt.botAngryLevel += 2;
+          db.chat[dbIds].rpt.spam.word.push(text);
+          db.chat[dbIds].rpt.spam.word.cout++;;
         };
       }else {
         sessions[idSession].currentCount = 0;
@@ -467,11 +476,13 @@ handler.on("message", async m =>{
     if(state === "apkbr"){
       if(similarity(text.split(" ")[0], "baik") >= high){
         const bWord = ["Alhamdulillah", "Okok sip"]
-        db.chat[dbIds].good += 1;
+        db.chat[dbIds].rpt.botAngryLevel--;
+        db.chat[dbIds].rpt.good++;
         m.react("👌")
         m.reply(pickRandom(bWord))
         sessions[idSession].state = ""
       }else if(similarity(text.split(" ")[0], "buruk") >= high){
+        db.chat[dbIds].rpt.botAngryLevel--;
         const bWord = ["Waduh kenapa?", "Sini cerita"]
         m.react("👌")
         m.reply(pickRandom(bWord))
@@ -483,7 +494,8 @@ handler.on("message", async m =>{
       }
     }else if(state === "crty"){
       m.reply(pickRandom(["Yaudah, Yang sabar ya, TETAP SEMANGAT!!", "TETAP SEMANGAT!!, jangan putus asa"]))
-      db.chat[dbIds].good += 2;
+      db.chat[dbIds].rpt.good += 2;
+      db.chat[dbIds].rpt.botAngryLevel--;
       sessions[idSession].state = ""
     }else if(state === "woireac"){
       if(!sessions[idSession].repeat){
@@ -492,7 +504,8 @@ handler.on("message", async m =>{
       }else {
         if(text.includes("woi")){
           m.reply(pickRandom(["Asw", "Bacod kontol"]))
-          db.chat[dbIds].bad += 1;
+          db.chat[dbIds].rpt.botAngryLevel++;
+          db.chat[dbIds].rpt.bad++;
           sessions[idSession].repeat = false
           sessions[idSession].state = ""
         }else {
@@ -504,7 +517,7 @@ handler.on("message", async m =>{
     }else if(state === "woireack"){
       if(similarity(text.split([" "])[0]+""+text.split([" "])[1], "tidak ramah") >= medium||text.includes("ngegas")||text.includes("anj")||text.includes("ajg")){
         m.react("🤣")
-        db.chat[dbIds].good += 1;
+        db.chat[dbIds].rpt.good++;
         sessions[idSession].state = ""
       }else {
         sessions[idSession].state = ""
@@ -516,22 +529,26 @@ handler.on("message", async m =>{
     }else if(state === "pe"){
       if (similarity(text, "assalamualaikum") >= medium){
         m.reply("Waalaikumsalam")
-        db.chat[dbIds].good += 1;
+        db.chat[dbIds].rpt.good++;
+        db.chat[dbIds].rpt.botAngryLevel--;
         chat.sendMessage("Nah Gitu Dong")
         sessions[idSession].state = ""
       }else if (similarity(text, "shalom") >= medium||similarity(text, "misi") >= medium){
-        db.chat[dbIds].good += 1;
+        db.chat[dbIds].rpt.good++;
+        db.chat[dbIds].rpt.botAngryLevel--;
         m.reply("Nah Gitu Dong")
         sessions[idSession].state = ""
       }else {
-        db.chat[dbIds].bad += 1;
+        db.chat[dbIds].rpt.bad++;
+        db.chat[dbIds].rpt.botAngryLevel++;
         m.reply(pickRandom(["BGST", "ANJ", "Dasar OM OM", "SAT"]))
         sessions[idSession].state = ""
       }
     }else if(state === "trim"){
       if(similarity(text, "trimakasih") >= medium){
         m.reply("sama sama :)");
-        db.chat[dbIds].good += 1;
+        db.chat[dbIds].rpt.botAngryLevel--;
+        db.chat[dbIds].rpt.good++;
         sessions[idSession].state = ""
       }else {
         sessions[idSession].state = ""
@@ -555,7 +572,8 @@ handler.on("message", async m =>{
       }
     }else if(state === "lkgpn"){
       if(text.includes("iya")||text.includes("hooh")){
-        db.chat[dbIds].bad += 1;
+        db.chat[dbIds].rpt.bad++;
+        db.chat[dbIds].rpt.botAngryLevel++;
         m.reply(pickRandom(["BGST", "ANJ", "WTF"]))
         sessions[idSession].state = ""
       }else {
@@ -564,7 +582,7 @@ handler.on("message", async m =>{
       }
     }else if(state === "mtnp"){
       if(mention&&chat.isGroup&&isAdminGroup&&!text.split(" ")[1]){
-        db.chat[dbIds].babu += 1;
+        db.chat[dbIds].rpt.babu++;
         if(!isMentionAdmin){
           if(!mention.isMe){
             await chat.promoteParticipants([`${mention.number}@c.us`])
@@ -584,7 +602,7 @@ handler.on("message", async m =>{
       }
     }else if(state === "mtnd"){
       if(mention&&chat.isGroup&&isAdminGroup&&!text.split(" ")[1]){
-        db.chat[dbIds].babu += 1;
+        db.chat[dbIds].rpt.babu++;
         if(isMentionAdmin){
           if(!isMentionOwner){
             if(!mention.isMe){
