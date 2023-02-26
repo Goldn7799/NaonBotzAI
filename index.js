@@ -83,7 +83,7 @@ handler.on("message", async m =>{
   let ownerNumber;
   let isAdminGroup, isMentionAdmin, isMentionOwner;
   if (chat.isGroup){
-    ownerNumber = await chat.groupMetadata.owner.user
+    ownerNumber = await chat.groupMetadata.owner.user;
     for (let participant of chat.participants){
       if(participant.id._serialized === m.author && participant.isAdmin){
         isAdminGroup = true;
@@ -338,13 +338,15 @@ handler.on("message", async m =>{
         if(isAdminGroup){
           if(mention){
             if(!isMentionAdmin){
-              await chat.promoteParticipants([`${mention.number}@c.us`])
-              await chat.sendMessage(`Yey *${mention.name}* sekarang jadi admin`, { mentions: [await handler.getContactById(`${mention.number}@c.us`)] })
-              if(idSession > -1){
-                sessions[idSession].state = "trim"
-              }else {
-                sessions.push({"id": ids, "state": "trim"})
-              }
+              if(!mention.isMe){
+                await chat.promoteParticipants([`${mention.number}@c.us`])
+                await chat.sendMessage(`Yey *${mention.name}* sekarang jadi admin`, { mentions: [await handler.getContactById(`${mention.number}@c.us`)] })
+                if(idSession > -1){
+                  sessions[idSession].state = "trim"
+                }else {
+                  sessions.push({"id": ids, "state": "trim"})
+                }
+              }else { m.reply("Tidak dapat mengubah info saya sendiri") }
             }else {
               m.reply(`*${mention.name}* sudah menjadi admin`)
             }
@@ -364,13 +366,15 @@ handler.on("message", async m =>{
           if(mention){
             if(isMentionAdmin){
               if(!isMentionOwner){
-                await chat.demoteParticipants([`${mention.number}@c.us`])
-                await chat.sendMessage(`Selamat *${mention.name}* bukan admin lagi`, { mentions: [await handler.getContactById(`${mention.number}@c.us`)] })
-                if(idSession > -1){
-                  sessions[idSession].state = "trim"
-                }else {
-                  sessions.push({"id": ids, "state": "trim"})
-                }
+                if(!mention.isMe){
+                  await chat.demoteParticipants([`${mention.number}@c.us`])
+                  await chat.sendMessage(`Selamat *${mention.name}* bukan admin lagi`, { mentions: [await handler.getContactById(`${mention.number}@c.us`)] })
+                  if(idSession > -1){
+                    sessions[idSession].state = "trim"
+                  }else {
+                    sessions.push({"id": ids, "state": "trim"})
+                  }
+                }else { m.reply("Tidak dapat mengubah info saya sendiri") }
               }else { m.reply("Tidak bisa mengkudeta *Owner* grup") }
             }else{ m.reply(`*${mention.name}* sudah bukan menjadi admin`) }
           }else { 
@@ -480,13 +484,15 @@ handler.on("message", async m =>{
     }else if(state === "mtnp"){
       if(mention&&chat.isGroup&&isAdminGroup&&!text.split(" ")[1]){
         if(!isMentionAdmin){
-          await chat.promoteParticipants([`${mention.number}@c.us`])
-          await chat.sendMessage(`Yey *${mention.name}* sekarang jadi admin`, { mentions: [await handler.getContactById(`${mention.number}@c.us`)] })
-          if(idSession > -1){
-            sessions[idSession].state = "trim"
-          }else {
-            sessions.push({"id": ids, "state": "trim"})
-          }
+          if(!mention.isMe){
+            await chat.promoteParticipants([`${mention.number}@c.us`])
+            await chat.sendMessage(`Yey *${mention.name}* sekarang jadi admin`, { mentions: [await handler.getContactById(`${mention.number}@c.us`)] })
+            if(idSession > -1){
+              sessions[idSession].state = "trim"
+            }else {
+              sessions.push({"id": ids, "state": "trim"})
+            }
+          }else { m.reply("Tidak dapat mengubah info saya sendiri") }
         }else {
           m.reply(`*${mention.name}* sudah menjadi admin`)
         }
@@ -498,13 +504,15 @@ handler.on("message", async m =>{
       if(mention&&chat.isGroup&&isAdminGroup&&!text.split(" ")[1]){
         if(isMentionAdmin){
           if(!isMentionOwner){
-            await chat.demoteParticipants([`${mention.number}@c.us`])
-            await chat.sendMessage(`Selamat *${mention.name}* bukan admin lagi`, { mentions: [await handler.getContactById(`${mention.number}@c.us`)] })
-            if(idSession > -1){
-              sessions[idSession].state = "trim"
-            }else {
-              sessions.push({"id": ids, "state": "trim"})
-            }
+            if(!mention.isMe){
+              await chat.demoteParticipants([`${mention.number}@c.us`])
+              await chat.sendMessage(`Selamat *${mention.name}* bukan admin lagi`, { mentions: [await handler.getContactById(`${mention.number}@c.us`)] })
+              if(idSession > -1){
+                sessions[idSession].state = "trim"
+              }else {
+                sessions.push({"id": ids, "state": "trim"})
+              }
+            }else { m.reply("Tidak dapat mengubah info saya sendiri") }
           }else { m.reply("Tidak bisa mengkudeta *Owner* grup") }
         }else{ m.reply(`*${mention.name}* sudah bukan menjadi admin`) }
       }else {
