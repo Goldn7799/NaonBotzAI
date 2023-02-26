@@ -23,12 +23,13 @@ const read = ()=>{
       })
     }else {
       db = JSON.parse(res);
-      console.log("Database Loaded")
+      console.log("- Database Loaded -")
     }
   })
 }
 read()
 Host.initialize();
+console.log("Connecting to WhatsApp...")
 
 Host.on("message", async m =>{
   console.log(`Recived => ${m.from}(${(await m.getChat()).name}) | ${m.author}(${m._data.notifyName}) => ${m.body}`);
@@ -96,8 +97,23 @@ handler.on("message", async m =>{
     let chat = await m.getChat();
     let ids = (chat.isGroup) ? m.author : m.from;
     let mention = await (await m.getMentions())[0];
+    let textSplit = text.split(" ");
     let ownerNumber;
     let isAdminGroup, isMentionAdmin, isMentionOwner;
+    let idSession, i= 0;
+    let dbIds = 0, dis = 0;
+    sessions.map(dts =>{
+      if(dts.id === ids){
+        idSession = i;
+      };
+      i++
+    });
+    db.chat.map(async dat=>{
+      if(dat.id === ids){
+        dbIds = dis;
+      };
+      dis++;
+    })
     if (chat.isGroup){
       for (let participant of chat.participants){
         if(participant.id._serialized === m.author && participant.isAdmin){
@@ -110,7 +126,7 @@ handler.on("message", async m =>{
         db.chat[dbIds].rpt.ngetag++;
       };
       if (chat.isGroup){
-        ownerNumber = await chat.groupMetadata.owner.user;
+        ownerNumber = (await chat.owner) ? chat.owner.user : "000@c.us";
         for (let participant of chat.participants){
           if(participant.id._serialized === `${mention.number}@c.us` && participant.isAdmin){
             isMentionAdmin = true;
@@ -126,20 +142,7 @@ handler.on("message", async m =>{
     let high = 0.75;
     let medium = 0.65;
     let low = 0.55;
-    let idSession, i= 0;
-    let dbIds = 0, dis = 0;
-    sessions.map(dts =>{
-      if(dts.id === ids){
-        idSession = i;
-      };
-      i++
-    });
-    db.chat.map(async dat=>{
-      if(dat.id === ids){
-        dbIds = dis;
-      };
-      dis++;
-    })
+    
     const next = async ()=>{
       try{
         if(similarity(text.split(" ")[0], "halo") >= 0.9||similarity(text.split(" ")[0], "hai") >= 0.9){
@@ -454,6 +457,53 @@ handler.on("message", async m =>{
               }
             }else { m.reply("Anda bukan admin") }
           }else { m.reply("Pastikan anda di dalam grup") }
+        }else if(similarity(textSplit[0]+" "+textSplit[1]+" "+textSplit[2], "siapa yang paling") >= medium){
+          if(chat.isGroup){
+            if(textSplit[3]){
+              const pckRan = (pickRandom(["true", "", "true"])) ? true : false;
+              if(pckRan){
+                let userList = [];
+                chat.participants.map(dt =>{ userList.push(dt.id.user) });
+                const randomUserNumber = pickRandom(userList);
+                const RandomUserContact = await handler.getContactById(`${randomUserNumber}@c.us`);
+                chat.sendMessage(`Yang paling *${((text.replace("siapa yang paling ", "")).replace("?", "")).toUpperCase()}* ${pickRandom(["adalah", "ialah", "itu"])} *@${(RandomUserContact.pushname) ? RandomUserContact.pushname : RandomUserContact.number}*`, { mentions: [RandomUserContact, await handler.getContactById(m.author)] })
+              }else {
+                m.reply(pickRandom(["Kamu nanyea?", "Antum nanyea?", "Anda nanyea?, anda bertanyea tanyea?"]))
+                if(idSession > -1){
+                  sessions[idSession].state = "nyea"
+                  sessions[idSession].currentCommand = text
+                }else {
+                  sessions.push({"id": ids, "state": "nyea", "currentCommand": text})
+                }
+              }
+            }else {
+              m.reply("Yang paling apa???, bego???")
+              if(idSession > -1){
+                sessions[idSession].state = "paling"
+              }else {
+                sessions.push({"id": ids, "state": "paling"})
+              }
+            }
+          }else{
+            m.reply("Pastikan anda berada dalam grup")
+          }
+        }else if(similarity(text, "bisa apa") >= medium){
+          m.react("😁");
+          m.reply(`
+Saya bisa promote/demote user di grup, bisa mengirim pesan balasan, bisa mencari orang random, bisa mencari paling(random) dengan kata kunci, siapa yang paling <ACTION>, saya bisa membalas chat anda, saya bisa marah, memahami sifat seseorang, memahami kebiasaan
+          `)
+          chat.sendMessage("Jika butuh bantuan silahkan hubungi owner :), AI ini masih dalam tahap pengembangan :v", { mentions: [await handler.getContactById(ids)] });
+          chat.sendMessage(await handler.getContactById('6281228020195@c.us'), { mentions: [await handler.getContactById(ids)] });
+        }else if(similarity(text, "pilih orang random") >= medium){
+          if(chat.isGroup){
+            let userList = [];
+            chat.participants.map(dt =>{ userList.push(dt.id.user) });
+            const randomUserNumber = pickRandom(userList);
+            const RandomUserContact = await handler.getContactById(`${randomUserNumber}@c.us`);
+            chat.sendMessage(`Selamat *${(RandomUserContact.pushname) ? RandomUserContact.pushname : RandomUserContact.number}* anda terpilih`, { mentions: [await handler.getContactById(ids), await handler.getContactById(`${RandomUserContact.number}@c.us`)] })
+          }else {
+            m.reply("Siapa yang mau di pilih?, Setidak nya anda di grup")
+          }
         };
       }catch(e){
         await handler.sendMessage("6281228020195@c.us", `${await e}`)
@@ -625,6 +675,37 @@ handler.on("message", async m =>{
           sessions[idSession].state = ""
           next()
         }
+      }else if(state === "paling"&&chat.isGroup){
+        if(similarity(text, "iya") >= high){
+          sessions[idSession].state = ""
+          let userList = [];
+          chat.participants.map(dt =>{ userList.push(dt.id.user) });
+          const randomUserNumber = pickRandom(userList);
+          const RandomUserContact = await handler.getContactById(`${randomUserNumber}@c.us`);
+          chat.sendMessage(`Yang paling *BEGO* ${pickRandom(["adalah", "ialah", "itu"])} *@${(RandomUserContact.pushname) ? RandomUserContact.pushname : RandomUserContact.number}*`, { mentions: [RandomUserContact, await handler.getContactById(m.author)] })
+        }else{
+          sessions[idSession].state = ""
+          let userList = [];
+          chat.participants.map(dt =>{ userList.push(dt.id.user) });
+          const randomUserNumber = pickRandom(userList);
+          const RandomUserContact = await handler.getContactById(`${randomUserNumber}@c.us`);
+          chat.sendMessage(`Yang paling *${((text.replace("siapa yang paling ", "")).replace("?", "")).toUpperCase()}* ${pickRandom(["adalah", "ialah", "itu"])} *@${(RandomUserContact.pushname) ? RandomUserContact.pushname : RandomUserContact.number}*`, { mentions: [RandomUserContact, await handler.getContactById(m.author)] })
+        }
+      }else if(state === "nyea"){
+        if(similarity(text, "iya") >= medium){
+          sessions[idSession].state = "";
+          chat.sendMessage("Sini aku kasih tau ya", { mentions: [await handler.getContactById(ids)] });
+          let userList = [];
+          chat.participants.map(dt =>{ userList.push(dt.id.user) });
+          const randomUserNumber = pickRandom(userList);
+          const RandomUserContact = await handler.getContactById(`${randomUserNumber}@c.us`);
+          chat.sendMessage(`Yang paling *${(((sessions[idSession].currentCommand).replace("siapa yang paling ", "")).replace("?", "")).toUpperCase()}* ${pickRandom(["adalah", "ialah", "itu"])} *@${(RandomUserContact.pushname) ? RandomUserContact.pushname : RandomUserContact.number}*`, { mentions: [RandomUserContact, await handler.getContactById(m.author)] })
+          sessions[idSession].currentCommand = "";
+        }else {
+          sessions[idSession].state = "";
+          sessions[idSession].currentCommand = "";
+          next()
+        }
       }else { 
         sessions[idSession].repeat = false
         sessions[idSession].state = ""
@@ -651,5 +732,6 @@ handler.on("message", async m =>{
     // }
   }catch(e){ 
     await handler.sendMessage("6281228020195@c.us", `${await e}`)
+    // throw e
   }
 })
