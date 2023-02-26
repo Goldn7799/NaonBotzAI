@@ -140,8 +140,8 @@ handler.on("message", async m =>{
       }
     };
     let high = 0.75;
-    let medium = 0.65;
-    let low = 0.55;
+    let medium = 0.7;
+    let low = 0.65;
     
     const next = async ()=>{
       try{
