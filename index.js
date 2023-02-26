@@ -34,7 +34,7 @@ console.log("Connecting to WhatsApp...")
 Host.on("message_create", async mes =>{
   const chatsMe = await mes.getChat()
   if(mes.fromMe){
-    console.log(`Sent :: ${mes.from}(${chatsMe.name}) | ${handler.info.pushname} => ${(mes.type === "chat") ? mes.body : (mes.type === "sticker") ? "Stiker 😃" : (mes.type === "image") ? "Foto 📷" : (mes.type === "video") ? "Video 🎥" : (mes.type === "audio") ? "Audio 🔉" : (mes.type === "document") ? "Document 📃" : (mes.type === "location") ? "Lokasi 👆" : (mes.type === "contact") ? "Kontak 👤" : (m.type === "ptt") ? "Pesan Suara 🎙" : (m.type === "vcard") ? "VCard 📇" : "IDK ❓"}`)
+    console.log(`Sent :: ${mes.from}(${chatsMe.name}) | ${handler.info.pushname} => ${(mes.type === "chat") ? mes.body : (mes.type === "sticker") ? "Stiker 😃" : (mes.type === "image") ? "Foto 📷" : (mes.type === "video") ? "Video 🎥" : (mes.type === "audio") ? "Audio 🔉" : (mes.type === "document") ? "Document 📃" : (mes.type === "location") ? "Lokasi 👆" : (mes.type === "contact") ? "Kontak 👤" : (mes.type === "ptt") ? "Pesan Suara 🎙" : (mes.type === "vcard") ? "VCard 📇" : "IDK ❓"}`)
   };
 })
 Host.on("message", async m =>{
