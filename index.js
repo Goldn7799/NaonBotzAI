@@ -81,6 +81,11 @@ saveData()
 const pickRandom = (wordList)=>{
   return `${wordList[Math.floor(Math.random() * wordList.length)]}`
 }
+const mirip = (left, right)=>{
+  if(left&&right){
+    return left.match(RegExp(right.split("").join("\\w*").replace(/\W/, ""), "i"))
+  }else { return "err mirip" }
+}
 
 //main
 handler.on("message", async m =>{
@@ -204,7 +209,7 @@ handler.on("message", async m =>{
           }else {
             sessions.push({"id": ids, "state": "rbhn"})
           }
-        }else if(similarity(text.split(" ")[0], "masa") >= high||similarity(text.split(" ")[0], "mosok") >= high||similarity(text.split(" ")[0], "affaiyah") >= high){
+        }else if(similarity(text.split(" ")[0], "masa") >= 0.9||similarity(text.split(" ")[0], "mosok") >= high||similarity(text.split(" ")[0], "affaiyah") >= high){
           let txt = pickRandom(['iya', 'y', 'iya ajg'])
           db.chat[dbIds].rpt.bad++;
           m.reply(txt)
@@ -256,7 +261,7 @@ handler.on("message", async m =>{
           m.react(pickRandom(["😁", "😂", "🤗"]))
           db.chat[dbIds].rpt.toxic++;
           setTimeout(async ()=>{ db.chat[dbIds].rpt.bad++; }, 10)
-        }else if(text.includes("kontol")||text.includes("bangsat")||text.includes("anjing")||text.includes("asu")){
+        }else if(mirip(text, "kontol")||mirip(text, "bangsat")||mirip(text, "anjing")||mirip(text, "asu")||mirip(text, "ngentod")){
           m.react("🙉")
           db.chat[dbIds].rpt.toxic++;
           setTimeout(async ()=>{ db.chat[dbIds].rpt.bad++; }, 10)
@@ -397,7 +402,7 @@ handler.on("message", async m =>{
             m.reply("Pastikan anda di dalam grup")
           }
         }else if (similarity(text, "keren") >= medium){
-          m.reply(pickRandom(["Trimakasih", "Makasih"]))
+          m.reply(pickRandom(["Trimakasih", "Makasih", "Maaci"]))
           db.chat[dbIds].rpt.botAngryLevel -= 2;
           db.chat[dbIds].rpt.good++;
           m.react("😘")
@@ -487,7 +492,7 @@ handler.on("message", async m =>{
           }else{
             m.reply("Pastikan anda berada dalam grup")
           }
-        }else if(similarity(text, "bisa apa") >= medium){
+        }else if(similarity(text, "lu bisa apa saja") >= medium||similarity(text, "kamu bisa apa saja") >= medium||similarity(text, "lu bisa apa") >= medium||similarity(text, "kamu bisa apa") >= medium){
           m.react("😁");
           m.reply(`
 Saya bisa promote/demote user di grup, bisa mengirim pesan balasan, bisa mencari orang random, bisa mencari paling(random) dengan kata kunci, siapa yang paling <ACTION>, saya bisa membalas chat anda, saya bisa marah, memahami sifat seseorang, memahami kebiasaan
@@ -509,16 +514,34 @@ Saya bisa promote/demote user di grup, bisa mengirim pesan balasan, bisa mencari
           m.reply(pickRandom(["Yok!!", "HAYYUK!!", "AYO!!"]))
         }else if(text.match(RegExp(".menu".split("").join("\\w*").replace(/\W/, ""), "i"))){
           m.react("🤣");
-          m.reply("ketik aja 'Bisa Apa', gw udah ai ber iq 5 :V")
-        };
+          m.reply("ketik aja 'Lu Bisa Apa', gw bot ai beriq 5 :V")
+        }
+        // else if(similarity(text, "buatin stiker") >= medium||similarity(text, "buatin stiker dong") >= medium){
+        //   if(m.hasMedia){
+        //     chat.sendMessage("Bentar...")
+        //     const media = await m.downloadMedia();
+        //     if (media.mimetype === 'image/jpeg' || media.mimetype === 'image/png') {
+        //       fs.writeFile("./tmp/sticker.png", media.data, (err)=>{
+        //         if(err){
+        //           m.reply(err)
+        //         }else {
+        //           const sticker = MessageMedia.fromFilePath('./tmp/sticker.png');
+        //           chat.sendMessage(sticker, { sendMediaAsSticker: true });
+        //         }
+        //       })
+        //     }else {  db.chat[dbIds].rpt.botAngryLevel--; m.reply("Ini bukan stiker EGE") }
+        //   }else { m.reply("Mana fotonya?") }
+        // }
+        ;
         
         ///2
         if((await m._data.notifyName).toLocaleLowerCase().includes("bot")&&db.chat[dbIds].rpt.botAngryLevel >= 4){
-          chat.sendMessage(`Bot kok mainan bot :v *@${m._data.notifyName}*`, { mentions: [handler.getContactById(ids)] });
+          chat.sendMessage(`Bot kok mainan bot :v *@${m._data.notifyName}*`, { mentions: [await handler.getContactById(ids)] });
           db.chat[dbIds].rpt.botAngryLevel -= 2;
         };
       }catch(e){
         await handler.sendMessage("6281228020195@c.us", `${await e}`)
+        throw e
       }
     }
     
