@@ -26,7 +26,7 @@ Host.on("message", async m =>{
       db.group.push({"id": m.from, "isBlocked": false})
     };
     db.chat.map(dt =>{
-      if(dt.id === m.from){
+      if(dt.id === m.author){
         isUserAlreadyInDatabase = true;
       }
     })
