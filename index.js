@@ -15,10 +15,12 @@ console.log("Starting...")
 const read = ()=>{
   fs.readFile(path, "utf-8", (err, res)=>{
     if(err){
+      console.log("Creating Database...")
       fs.writeFile(path, JSON.stringify({"chat": [{"id":"dummy","isBlocked":false,"name":"Ken","rpt":{"good":8,"bad":261,"babu":0,"toxic":262,"badBego":0,"goodSeru":0,"wibu":0,"ngetag":0,"cewe":0,"spam":{"cout":0,"word":[]},"botAngryLevel":0,"userAngryLevel":0}}], "group": [{"id":"dummy","isBlocked":false}]}), (err)=>{
         if(err){
           console.error(err)
         }else {
+          console.log("- Creating Database Succes -")
           read();
         }
       })
@@ -554,7 +556,7 @@ handler.on("message", async m =>{
         }else if(similarity(text, "lu bisa apa saja") >= medium||similarity(text, "kamu bisa apa saja") >= medium||similarity(text, "lu bisa apa") >= medium||similarity(text, "kamu bisa apa") >= medium){
           await m.react("😁");
           await m.reply(`
-Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSaya bisa *pilih orang random*,\nSaya bisa mencari paling(random) dengan kata kunci *siapa yang paling*,\nSaya bisa *buatin stiker*,\nSaya bisa memberi tahu *berita terkini*,\nSaya bisa membalas chat anda,\nSaya bisa mencarikan sesuatu di google, contoh *Gimana caranya bersiul?*,\nSaya bisa marah, memahami sifat seseorang, memahami kebiasaan
+Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSaya bisa *pilih orang random*,\nSaya bisa mencari paling(random) dengan kata kunci *siapa yang paling*,\nSaya bisa *buatin stiker*,\nSaya bisa memberi tahu *berita terkini*,\nSaya bisa membalas chat anda,\nSaya bisa mencarikan sesuatu di google, contoh *Gimana caranya bersiul?*,\nSaya bisa membuat stiker di *jadiin foto*\nSaya bisa marah, memahami sifat seseorang, memahami kebiasaan
           `)
           await chat.sendMessage("Jika butuh bantuan silahkan hubungi owner :), AI ini masih dalam tahap pengembangan :v", { mentions: [await handler.getContactById(ids)] });
           await chat.sendMessage(await handler.getContactById('6281228020195@c.us'), { mentions: [await handler.getContactById(ids)] });
@@ -609,6 +611,25 @@ Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSay
         }else if(m.type === "chat"&&(mirip(text, "nama kamu siapa")||mirip(text, "nama mu siapa")||mirip(text, "nama lu siapa"))){
           db.chat[dbIds].rpt.botAngryLevel--;
           await m.reply(`Hai, perkenalkan nama ku *${handler.info.pushname}*, aku adalah bot AI buatan *Syeif Sultoni Akbar*, Salam Kenal :)`)
+        }else if(m.hasQuotedMsg&&(similarity(text, "jadiin foto") >= high||similarity(text, "jadiin foto dong") >= high)){
+          const qMsg = await m.getQuotedMessage();
+          if(qMsg.type === "sticker"){
+            if(qMsg.hasMedia){
+              const userContact = await handler.getContactById(ids);
+              const media = await qMsg.downloadMedia()
+              await chat.sendMessage("Bentar...", { mentions: [userContact] })
+              if(media.mimetype === "image/jpeg"||media.mimetype === "image/png"||media.mimetype === "image/webp"){
+                db.chat[dbIds].rpt.babu++;
+                await m.reply("Nih Foto..")
+                await chat.sendMessage(media, { mentions: [userContact] })
+                if(idSession > -1){
+                  sessions[idSession].state = "trim"
+                }else {
+                  sessions.push({"id": ids, "state": "trim"})
+                }
+              }else { m.reply("Tidak bisa mengconvert stiker tersebut :v") }
+            }else { m.reply("Kaga ada stiker nya ege") }
+          }else { m.reply("Ini mah bukan stiker") }
         };
         
         // ///2
@@ -616,6 +637,7 @@ Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSay
         //   chat.sendMessage(`Bot kok mainan bot :v *@${m._data.notifyName}*`, { mentions: [await handler.getContactById(ids)] });
         //   db.chat[dbIds].rpt.botAngryLevel -= 2;
         // };
+        
       }catch(e){
         await handler.sendMessage("6281228020195@c.us", `${await e}`)
         // throw e
