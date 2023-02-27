@@ -1,5 +1,6 @@
 node_modules/
 database.json
+word-database.json
 idk.txt
 yarn.lock
 .wwebjs_auth/

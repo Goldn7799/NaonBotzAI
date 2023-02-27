@@ -203,7 +203,7 @@ handler.on("message", async m =>{
               sessions.push({"id": ids, "state": "apkbr"})
             }
           };
-          m.reply(hWord)
+          await m.reply(hWord)
         }
         // else if(similarity(text.split(" ")[0], "baik") >= high){
         //   const bWord = ["Oke", "Siap"]
@@ -211,7 +211,7 @@ handler.on("message", async m =>{
         //   m.reply(pickRandom(bWord))
         // }
         else if(similarity(text.split(" ")[0], "apakabar") >= medium||similarity(text.split(" ")[0], "apa kabar") >= medium){
-          m.react("👍")
+          await m.react("👍")
           db.chat[dbIds].rpt.botAngryLevel--;
           db.chat[dbIds].rpt.good++;
           let apWord = pickRandom(["Aman", "Baik", `Saya baik baik saja ${names}`, `Baik ${names}, kamu gimana?`]);
@@ -222,14 +222,14 @@ handler.on("message", async m =>{
               sessions.push({"id": ids, "state": "apkbr"})
             }
           };
-          m.reply(apWord)
+          await m.reply(apWord)
         }else if(similarity(text.split(" ")[0], "oke") >= high){
-          m.react("😉")
+          await m.react("😉")
           db.chat[dbIds].rpt.good++;
         }else if (similarity(text.split(" ")[0], "woi") >= high){
           let txt = pickRandom(["Apaan", "affah", "HAH?", "Naon", "Opo seh", "apa ajg"])
           db.chat[dbIds].rpt.bad++;
-          m.reply(txt)
+          await m.reply(txt)
           if(txt.includes("ajg")){
             db.chat[dbIds].rpt.botAngryLevel++;
             if(idSession > -1){
@@ -245,7 +245,7 @@ handler.on("message", async m =>{
             }
           }
         }else if (similarity((text.split(" ")[0]+" "+text.split(" ")[1]), 'lagi apa') >= high||similarity((text.split(" ")[0]+" "+text.split(" ")[1]), 'lagi ngapain') >= high){
-          m.reply(pickRandom(['Lagi turu', 'rebahan', 'mbangkong']))
+          await m.reply(pickRandom(['Lagi turu', 'rebahan', 'mbangkong']))
           db.chat[dbIds].rpt.botAngryLevel--;
           if(idSession > -1){
             sessions[idSession].state = "rbhn"
@@ -255,7 +255,7 @@ handler.on("message", async m =>{
         }else if(similarity(text.split(" ")[0], "masa") >= 0.9||similarity(text.split(" ")[0], "mosok") >= high||similarity(text.split(" ")[0], "affaiyah") >= high){
           let txt = pickRandom(['iya', 'y', 'iya ajg'])
           db.chat[dbIds].rpt.bad++;
-          m.reply(txt)
+          await m.reply(txt)
           if(txt.includes("ajg")){
             db.chat[dbIds].rpt.botAngryLevel++;
             if(idSession > -1){
@@ -265,7 +265,7 @@ handler.on("message", async m =>{
             }
           };
         }else if(similarity(text.split([" "])[0]+""+text.split([" "])[1], "tanggal berapa") >= medium||similarity(text.split([" "])[0]+""+text.split([" "])[1], "hari apa") >= medium||similarity(text.split([" "])[0]+""+text.split([" "])[1], "jam berapa") >= medium||similarity(text.split([" "])[0]+""+text.split([" "])[1], "tahun berapa") >= medium){
-          m.reply(`Sekarang ${Date()}`)
+          await m.reply(`Sekarang ${Date()}`)
         }
         // else if(similarity(text.split([" "])[0]+""+text.split([" "])[1], "tidak ramah") >= medium){
         //   m.react("🤣")
@@ -287,24 +287,24 @@ handler.on("message", async m =>{
           }) => {
               return `*${title}*\n_${url}_\n_${description}_`
           }).join('\n\n')
-          m.reply(msg)
+          await m.reply(msg)
         }else if(similarity(text, "news") >= 0.9||similarity(text, "berita hari ini") >= high||similarity(text, "berita terkini") >= high){
           const result = await cnbindonesia();
           db.chat[dbIds].rpt.good++;
           if(result){
-            m.reply("Tunggu sebentar ...")
+            await m.reply("Tunggu sebentar ...")
             downloadImage(result[0].image, './tmp/news.png', async ()=>{
               const medias = await MessageMedia.fromFilePath("./tmp/news.png");
               if(medias){
                 await chat.sendMessage(medias, { mentions: [await handler.getContactById(ids)] });
                 await chat.sendMessage(`*${result[0].title}*\n${result[0].date}\n\n${result[0].link}`, { mentions: [await handler.getContactById(ids)] })
-              }else{ m.reply("terjadi kesalahan") }
+              }else{ await m.reply("terjadi kesalahan") }
             })
           }else {
-            m.reply("Tidak ada berita hari ini")
+            await m.reply("Tidak ada berita hari ini")
           }
         }else if (text === "p"){
-          m.reply(pickRandom(["Salam deck", "minimal salam lah", "setidak nya salam", "pa pe pa pe"]))
+          await m.reply(pickRandom(["Salam deck", "minimal salam lah", "setidak nya salam", "pa pe pa pe"]))
           db.chat[dbIds].rpt.bad++;
           db.chat[dbIds].rpt.botAngryLevel += 2;
           if(idSession > -1){
@@ -313,13 +313,13 @@ handler.on("message", async m =>{
             sessions.push({"id": ids, "state": "pe"})
           }
         }else if(text.substring(0, 2) === "oo"){
-          m.reply(pickRandom(["ohh", "ooo", "ooalah"]))
+          await m.reply(pickRandom(["ohh", "ooo", "ooalah"]))
         }else if((similarity(text.split(" ")[1], "kontol") >= high||similarity(text.split(" ")[1], "asu") >= high||similarity(text.split(" ")[1], "bangsat") >= high||similarity(text.split(" ")[1], "gaje") >= high||similarity(text.split(" ")[1], "anj") >= high)&&text.split(" ")[0] === "bot"){
-          m.react(pickRandom(["😁", "😂", "🤗"]))
+          await m.react(pickRandom(["😁", "😂", "🤗"]))
           db.chat[dbIds].rpt.toxic++;
           setTimeout(async ()=>{ db.chat[dbIds].rpt.bad++; }, 10)
         }else if((mirip(text, "kontol")||mirip(text, "bangsat")||mirip(text, "anjing")||mirip(text, "asu")||mirip(text, "ngentod"))&&m.type === "chat"){
-          m.react("🙉")
+          await m.react("🙉")
           db.chat[dbIds].rpt.toxic++;
           setTimeout(async ()=>{ db.chat[dbIds].rpt.bad++; }, 10)
         }else if (similarity(text.split(" ")[0], "berapa") >= high&&text.split(" ")[2]){
@@ -327,18 +327,18 @@ handler.on("message", async m =>{
           try {
             if(similarity(text.split(" ")[2], "ditambah") >= high||text.split(" ")[2] === "+"){
               let result = parseInt(text.split(" ")[1]) + parseInt(text.split(" ")[3])
-              m.reply(`Hasil dari ${text.split(" ")[1]} + ${text.split(" ")[3]} = ${result}`); 
+              await m.reply(`Hasil dari ${text.split(" ")[1]} + ${text.split(" ")[3]} = ${result}`); 
             }else if(similarity(text.split(" ")[2], "dikurangi") >= high||text.split(" ")[2] === "-"){
               let result = parseInt(text.split(" ")[1]) - parseInt(text.split(" ")[3])
-              m.reply(`Hasil dari ${text.split(" ")[1]} - ${text.split(" ")[3]} = ${result}`); 
+              await m.reply(`Hasil dari ${text.split(" ")[1]} - ${text.split(" ")[3]} = ${result}`); 
             }else if(similarity(text.split(" ")[2], "dikali") >= high||text.split(" ")[2] === "x"){
               let result = parseInt(text.split(" ")[1]) * parseInt(text.split(" ")[3])
-              m.reply(`Hasil dari ${text.split(" ")[1]} x ${text.split(" ")[3]} = ${result}`); 
+              await m.reply(`Hasil dari ${text.split(" ")[1]} x ${text.split(" ")[3]} = ${result}`); 
             }else if(similarity(text.split(" ")[2], "dibagi") >= high||text.split(" ")[2] === "/"){
               let result = parseInt(text.split(" ")[1]) / parseInt(text.split(" ")[3])
-              m.reply(`Hasil dari ${text.split(" ")[1]} / ${text.split(" ")[3]} = ${result}`); 
+              await m.reply(`Hasil dari ${text.split(" ")[1]} / ${text.split(" ")[3]} = ${result}`); 
             }else {
-              m.reply("di apain ege, ditambah, dikali, dikurang atau di apa")
+              await m.reply("di apain ege, ditambah, dikali, dikurang atau di apa")
               db.chat[dbIds].rpt.badBego++;
               db.chat[dbIds].rpt.botAngryLevel++;
               if(idSession > -1){
@@ -348,21 +348,21 @@ handler.on("message", async m =>{
               }
             }
           }catch{
-            m.reply("Maaf ada kesalahan")
+            await m.reply("Maaf ada kesalahan")
           }
         }else if(similarity(text.split(" ")[0], "kaga") >= high||similarity(text.split(" ")[0], "engga") >= high){
-          m.reply(pickRandom(["Ohh", "oo", "ohh kirain", "walah"]))
+          await m.reply(pickRandom(["Ohh", "oo", "ohh kirain", "walah"]))
         }else if(similarity(text.split(" ")[0], "hoax") >= high||similarity(text.split(" ")[0], "halah") >= high){
-          m.react("😂")
+          await m.react("😂")
           db.chat[dbIds].rpt.goodSeru++;
         }else if(text.includes("saya cewe")||text.includes("gw cewe")||text.includes("aku cewe")){
-          m.react(pickRandom(["😀", "😍", "🥰", "😜"]))
+          await m.react(pickRandom(["😀", "😍", "🥰", "😜"]))
           db.chat[dbIds].rpt.cewe++;
           db.chat[dbIds].rpt.botAngryLevel -= 3;
         }else if(similarity(text, "kamu nanyea") >= medium){
           db.chat[dbIds].rpt.bad++;
           let txt = pickRandom(["IYAA", "HOOH", "IYA AJG"])
-          m.reply(txt)
+          await m.reply(txt)
           if(txt.includes("ajg")){
             db.chat[dbIds].rpt.botAngryLevel++;
             if(idSession > -1){
@@ -372,17 +372,17 @@ handler.on("message", async m =>{
             }
           };
         }else if(text.includes("orang mana")){
-          m.reply(pickRandom(["orang mars", "Aku orang mars kak", "aku orang bumi", "aku orang isekai"]))
+          await m.reply(pickRandom(["orang mars", "Aku orang mars kak", "aku orang bumi", "aku orang isekai"]))
           db.chat[dbIds].rpt.good++;
         }else if(text.includes("om om")){
-          m.react(pickRandom(["😏", "😒", "🙃", "😵", "🤨"]))
+          await m.react(pickRandom(["😏", "😒", "🙃", "😵", "🤨"]))
         }else if (text.includes("isekai")){
-          m.reply(pickRandom(["WIBUU", "DASAR WIBU"]))
+          await m.reply(pickRandom(["WIBUU", "DASAR WIBU"]))
           db.chat[dbIds].rpt.wibu++;
         }else if(similarity(text, "kamu bot?") >= medium||similarity(text, "lu bot?") >= medium){
           let txt = pickRandom(["Iyaa", "Hooh", "Iya gw bot", "Lu kira gw apaan?, Babi?"])
           db.chat[dbIds].rpt.bad++;
-          m.reply(txt)
+          await m.reply(txt)
           if(txt.includes("Lu kira gw apaan?")){
             db.chat[dbIds].rpt.botAngryLevel++;
             if(idSession > -1){
@@ -393,7 +393,7 @@ handler.on("message", async m =>{
           };
         }else if(text.includes("bot")){
           let tex = pickRandom(["Lu manggil gw?", `Ada apa ${names}`, "GW DI SINI"]);
-          m.reply(tex)
+          await m.reply(tex)
           if(tex.includes("Lu manggil gw?")){
             if(idSession > -1){
               sessions[idSession].state = "mggl"
@@ -404,65 +404,65 @@ handler.on("message", async m =>{
         }else if(similarity(text, "keren kaga") >= medium||similarity(text, "keren kan") >= medium){
           db.chat[dbIds].rpt.good++;
           db.chat[dbIds].rpt.botAngryLevel--;
-          m.reply(pickRandom(["GG", "Bagus bet", "Keren Banget"]))
+          await m.reply(pickRandom(["GG", "Bagus bet", "Keren Banget"]))
           if(idSession > -1){
             sessions[idSession].state = "trim"
           }else {
             sessions.push({"id": ids, "state": "trim"})
           }
         }else if(similarity(text.split(" ")[0], "siapa") >= high&&(text.includes("pencipta")||text.includes("pembuat")||text.includes("owner"))&&(similarity(text.split(" ").pop(), "mu") >= high||similarity(text.split(" ").pop(), "kamu") >= high)){
-          m.reply("Saya diciptakan oleh Syeif Sultoni Akbar menggunakkan NODEJS, similarity dan whatsapp-web.js");
+          await m.reply("Saya diciptakan oleh Syeif Sultoni Akbar menggunakkan NODEJS, similarity dan whatsapp-web.js");
           chat.sendMessage(await handler.getContactById('6281228020195@c.us'))
           db.chat[dbIds].rpt.good++;
           db.chat[dbIds].rpt.botAngryLevel -= 2;
         }else if(similarity(text, "apa pekerjaan mu") >= low){
-          m.reply(pickRandom(["Makan, Tidur doang", "Pengganguran", "Turu", "Rebahan"]))
+          await m.reply(pickRandom(["Makan, Tidur doang", "Pengganguran", "Turu", "Rebahan"]))
         }else if(await m.mentionedIds.includes(await handler.info.me.user)){
-          m.reply(pickRandom(["Apaan?", "Ada apa?", "Affah?", "Ngapain ngetag?"]))
+          await m.reply(pickRandom(["Apaan?", "Ada apa?", "Affah?", "Ngapain ngetag?"]))
           db.chat[dbIds].rpt.ngetag++;
           db.chat[dbIds].rpt.botAngryLevel++;
         }else if (similarity(text, "assalamualaikum") >= medium){
-          m.reply("Waalaikumsalam")
+          await m.reply("Waalaikumsalam")
           db.chat[dbIds].rpt.botAngryLevel -= 2;
         }else if(similarity(text, "buka grup") >= high){
           db.chat[dbIds].rpt.babu++;
           if(chat.isGroup){
               if(isAdminGroup){
                 chat.setMessagesAdminsOnly(false)
-                m.reply("Berhasil buka grup")
+                await m.reply("Berhasil buka grup")
                 if(idSession > -1){
                   sessions[idSession].state = "trim"
                 }else {
                   sessions.push({"id": ids, "state": "trim"})
                 }
               }else {
-                m.reply("Anda Bukan Admin")
+                await m.reply("Anda Bukan Admin")
               }
           }else {
-            m.reply("Pastikan anda di dalam grup")
+            await m.reply("Pastikan anda di dalam grup")
           }
         }else if(similarity(text, "tutup grup") >= high){
           db.chat[dbIds].rpt.babu++;
           if(chat.isGroup){
             if(isAdminGroup){
                 chat.setMessagesAdminsOnly(true)
-                m.reply("Berhasil menutup grup")
+                await m.reply("Berhasil menutup grup")
                 if(idSession > -1){
                   sessions[idSession].state = "trim"
                 }else {
                   sessions.push({"id": ids, "state": "trim"})
                 }
               }else {
-                m.reply("Anda Bukan Admin")
+                await m.reply("Anda Bukan Admin")
               }
           }else {
-            m.reply("Pastikan anda di dalam grup")
+            await m.reply("Pastikan anda di dalam grup")
           }
         }else if (similarity(text, "keren") >= medium){
-          m.reply(pickRandom(["Trimakasih", "Makasih", "Maaci"]))
+          await m.reply(pickRandom(["Trimakasih", "Makasih", "Maaci"]))
           db.chat[dbIds].rpt.botAngryLevel -= 2;
           db.chat[dbIds].rpt.good++;
-          m.react("😘")
+          await m.react("😘")
         }else if (similarity(text.split(" ")[0], "promote") >= high){
           db.chat[dbIds].rpt.babu++;
           if(chat.isGroup){
@@ -478,21 +478,21 @@ handler.on("message", async m =>{
                       }else {
                         sessions.push({"id": ids, "state": "trim"})
                       }
-                    }else { m.reply("Tidak dapat mengubah info saya sendiri") }
+                    }else { await m.reply("Tidak dapat mengubah info saya sendiri") }
                   }else {
-                    m.reply(`*${(mention.name) ? mention.name : mention.number}* sudah menjadi admin`)
+                    await m.reply(`*${(mention.name) ? mention.name : mention.number}* sudah menjadi admin`)
                   }
                 }else { 
-                  m.reply("Tolong mention salah satu")
+                  await m.reply("Tolong mention salah satu")
                   if(idSession > -1){
                     sessions[idSession].state = "mtnp"
                   }else {
                     sessions.push({"id": ids, "state": "mtnp"})
                   }
                 }
-              }else { m.reply("Anda bukan admin") }
-            }else { m.reply("saya bukan admin grup :v") }
-          }else { m.reply("Pastikan anda di dalam grup") }
+              }else { await m.reply("Anda bukan admin") }
+            }else { await m.reply("saya bukan admin grup :v") }
+          }else { await m.reply("Pastikan anda di dalam grup") }
         }else if (similarity(text.split(" ")[0], "demote") >= high){
           db.chat[dbIds].rpt.babu++;
           if(chat.isGroup){
@@ -509,20 +509,20 @@ handler.on("message", async m =>{
                         }else {
                           sessions.push({"id": ids, "state": "trim"})
                         }
-                      }else { m.reply("Tidak dapat mengubah info saya sendiri") }
-                    }else { m.reply("Tidak bisa mengkudeta *Owner* grup") }
-                  }else{ m.reply(`*${(mention.name) ? mention.name : mention.number}* sudah bukan menjadi admin`) }
+                      }else { await m.reply("Tidak dapat mengubah info saya sendiri") }
+                    }else { await m.reply("Tidak bisa mengkudeta *Owner* grup") }
+                  }else{ await m.reply(`*${(mention.name) ? mention.name : mention.number}* sudah bukan menjadi admin`) }
                 }else { 
-                  m.reply("Tolong mention salah satu")
+                  await m.reply("Tolong mention salah satu")
                   if(idSession > -1){
                     sessions[idSession].state = "mtnd"
                   }else {
                     sessions.push({"id": ids, "state": "mtnd"})
                   }
                 }
-              }else { m.reply("Anda bukan admin") }
-            }else { m.reply("Saya bukan admin grup :v") }
-          }else { m.reply("Pastikan anda di dalam grup") }
+              }else { await m.reply("Anda bukan admin") }
+            }else { await m.reply("Saya bukan admin grup :v") }
+          }else { await m.reply("Pastikan anda di dalam grup") }
         }else if(similarity(textSplit[0]+" "+textSplit[1]+" "+textSplit[2], "siapa yang paling") >= medium){
           if(chat.isGroup){
             if(textSplit[3]){
@@ -534,7 +534,7 @@ handler.on("message", async m =>{
                 const RandomUserContact = await handler.getContactById(`${randomUserNumber}@c.us`);
                 chat.sendMessage(`Yang paling *${((text.replace("siapa yang paling ", "")).replace("?", "")).toUpperCase()}* ${pickRandom(["adalah", "ialah", "itu"])} *@${(RandomUserContact.pushname) ? RandomUserContact.pushname : RandomUserContact.number}*`, { mentions: [RandomUserContact, await handler.getContactById(m.author)] })
               }else {
-                m.reply(pickRandom(["Kamu nanyea?", "Antum nanyea?", "Anda nanyea?, anda bertanyea tanyea?"]))
+                await m.reply(pickRandom(["Kamu nanyea?", "Antum nanyea?", "Anda nanyea?, anda bertanyea tanyea?"]))
                 if(idSession > -1){
                   sessions[idSession].state = "nyea"
                   sessions[idSession].currentCommand = text
@@ -543,7 +543,7 @@ handler.on("message", async m =>{
                 }
               }
             }else {
-              m.reply("Yang paling apa???, bego???")
+              await m.reply("Yang paling apa???, bego???")
               if(idSession > -1){
                 sessions[idSession].state = "paling"
               }else {
@@ -551,7 +551,7 @@ handler.on("message", async m =>{
               }
             }
           }else{
-            m.reply("Pastikan anda berada dalam grup")
+            await m.reply("Pastikan anda berada dalam grup")
           }
         }else if(similarity(text, "lu bisa apa saja") >= medium||similarity(text, "kamu bisa apa saja") >= medium||similarity(text, "lu bisa apa") >= medium||similarity(text, "kamu bisa apa") >= medium){
           await m.react("😁");
@@ -568,14 +568,14 @@ Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSay
             const RandomUserContact = await handler.getContactById(`${randomUserNumber}@c.us`);
             chat.sendMessage(`Selamat *${(RandomUserContact.pushname) ? RandomUserContact.pushname : RandomUserContact.number}* anda terpilih`, { mentions: [await handler.getContactById(ids), await handler.getContactById(`${RandomUserContact.number}@c.us`)] })
           }else {
-            m.reply("Siapa yang mau di pilih?, Setidak nya anda di grup")
+            await m.reply("Siapa yang mau di pilih?, Setidak nya anda di grup")
           }
         }else if(text.match(RegExp("berantem yok".split("").join("\\w*").replace(/\W/, ""), "i"))){
-          m.react("🤣");
-          m.reply(pickRandom(["Yok!!", "HAYYUK!!", "AYO!!"]))
+          await m.react("🤣");
+          await m.reply(pickRandom(["Yok!!", "HAYYUK!!", "AYO!!"]))
         }else if(text.match(RegExp(".menu".split("").join("\\w*").replace(/\W/, ""), "i"))){
-          m.react("🤣");
-          m.reply("ketik aja 'Lu Bisa Apa', gw bot ai beriq 5 :V")
+          await m.react("🤣");
+          await m.reply("ketik aja 'Lu Bisa Apa', gw bot ai beriq 5 :V")
         }else if(similarity(text, "buatin stiker") >= medium||similarity(text, "buatin stiker dong") >= medium){
           if(m.hasMedia){
             chat.sendMessage("Bentar...")
@@ -589,9 +589,9 @@ Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSay
               }else {
                 sessions.push({"id": ids, "state": "trim"})
               }
-            }else {  db.chat[dbIds].rpt.botAngryLevel++; m.reply("Ini bukan Foto EGE") }
+            }else {  db.chat[dbIds].rpt.botAngryLevel++; await m.reply("Ini bukan Foto EGE") }
           }else { 
-            m.reply("Mana fotonya?");
+            await m.reply("Mana fotonya?");
             if(idSession > -1){
               sessions[idSession].state = "stkr"
             }else {
@@ -627,9 +627,9 @@ Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSay
                 }else {
                   sessions.push({"id": ids, "state": "trim"})
                 }
-              }else { m.reply("Tidak bisa mengconvert stiker tersebut :v") }
-            }else { m.reply("Kaga ada stiker nya ege") }
-          }else { m.reply("Ini mah bukan stiker") }
+              }else { await m.reply("Tidak bisa mengconvert stiker tersebut :v") }
+            }else { await m.reply("Kaga ada stiker nya ege") }
+          }else { await m.reply("Ini mah bukan stiker") }
         };
         
         // ///2
@@ -667,33 +667,33 @@ Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSay
           const bWord = ["Alhamdulillah", "Okok sip"]
           db.chat[dbIds].rpt.botAngryLevel--;
           db.chat[dbIds].rpt.good++;
-          m.react("👌")
-          m.reply(pickRandom(bWord))
+          await m.react("👌")
+          await m.reply(pickRandom(bWord))
           sessions[idSession].state = ""
         }else if(similarity(text.split(" ")[0], "buruk") >= high){
           db.chat[dbIds].rpt.botAngryLevel--;
           const bWord = ["Waduh kenapa?", "Sini cerita"]
-          m.react("👌")
-          m.reply(pickRandom(bWord))
+          await m.react("👌")
+          await m.reply(pickRandom(bWord))
           sessions[idSession].state = "crty"
         }else {
-          m.react("👌")
-          m.reply("Okk")
+          await m.react("👌")
+          await m.reply("Okk")
           sessions[idSession].state = ""
         }
       }else if(state === "crty"){
-        m.reply(pickRandom(["Yaudah, Yang sabar ya, TETAP SEMANGAT!!", "TETAP SEMANGAT!!, jangan putus asa"]))
+        await m.reply(pickRandom(["Yaudah, Yang sabar ya, TETAP SEMANGAT!!", "TETAP SEMANGAT!!, jangan putus asa"]))
         db.chat[dbIds].rpt.good += 2;
         db.chat[dbIds].rpt.botAngryLevel--;
         sessions[idSession].state = ""
       }else if(state === "woireac"){
         if(similarity(text, "ngga") >= high||similarity(text, "kaga") >= high){
-          m.reply(pickRandom(["Oalah", "Ohh"]))
+          await m.reply(pickRandom(["Oalah", "Ohh"]))
           sessions[idSession].repeat = false
           sessions[idSession].state = ""
         }else if(text.includes("woi")){
           if(sessions[idSession].repeat){
-            m.reply(pickRandom(["Asw", "Bacod kontol"]))
+            await m.reply(pickRandom(["Asw", "Bacod kontol"]))
             db.chat[dbIds].rpt.botAngryLevel++;
             db.chat[dbIds].rpt.bad++;
             sessions[idSession].repeat = false
@@ -709,7 +709,7 @@ Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSay
         }
       }else if(state === "woireack"){
         if(similarity(text.split([" "])[0]+""+text.split([" "])[1], "tidak ramah") >= medium||text.includes("ngegas")||text.includes("anj")||text.includes("ajg")){
-          m.react("🤣")
+          await m.react("🤣")
           db.chat[dbIds].rpt.good++;
           sessions[idSession].state = ""
         }else {
@@ -717,11 +717,11 @@ Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSay
           next()
         }
       }else if(state === "rbhn"){
-        m.reply(pickRandom(["Mager jawab :v, lagi rebahan", "ohh, males, gw lagi rebahan"]))
+        await m.reply(pickRandom(["Mager jawab :v, lagi rebahan", "ohh, males, gw lagi rebahan"]))
         sessions[idSession].state = ""
       }else if(state === "pe"){
         if (similarity(text, "assalamualaikum") >= medium){
-          m.reply("Waalaikumsalam")
+          await m.reply("Waalaikumsalam")
           db.chat[dbIds].rpt.good++;
           db.chat[dbIds].rpt.botAngryLevel--;
           chat.sendMessage("Nah Gitu Dong")
@@ -729,17 +729,17 @@ Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSay
         }else if (similarity(text, "shalom") >= medium||similarity(text, "misi") >= medium){
           db.chat[dbIds].rpt.good++;
           db.chat[dbIds].rpt.botAngryLevel--;
-          m.reply("Nah Gitu Dong")
+          await m.reply("Nah Gitu Dong")
           sessions[idSession].state = ""
         }else {
           db.chat[dbIds].rpt.bad++;
           db.chat[dbIds].rpt.botAngryLevel++;
-          m.reply(pickRandom(["BGST", "ANJ", "Dasar OM OM", "SAT"]))
+          await m.reply(pickRandom(["BGST", "ANJ", "Dasar OM OM", "SAT"]))
           sessions[idSession].state = ""
         }
       }else if(state === "trim"){
         if(similarity(text, "trimakasih") >= medium){
-          m.reply("sama sama :)");
+          await m.reply("sama sama :)");
           db.chat[dbIds].rpt.botAngryLevel--;
           db.chat[dbIds].rpt.good++;
           sessions[idSession].state = ""
@@ -749,7 +749,7 @@ Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSay
         }
       }else if(state === "mggl"){
         if(similarity(text, "iya") >= high){
-          m.reply(pickRandom(["Kenapa emang?", "Ada apa manggil?"]))
+          await m.reply(pickRandom(["Kenapa emang?", "Ada apa manggil?"]))
           sessions[idSession].state = ""
         }else {
           sessions[idSession].state = ""
@@ -757,7 +757,7 @@ Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSay
         }
       }else if (state === "jmlh"){
         if(text.includes("ditambah")||text.includes("dikali")||text.includes("dikurangi")||text.includes("dibagi")){
-          m.reply("yaudah, tulis aja, contoh 'Berapa 1 dikali 1'")
+          await m.reply("yaudah, tulis aja, contoh 'Berapa 1 dikali 1'")
           sessions[idSession].state = ""
         }else {
           sessions[idSession].state = ""
@@ -767,7 +767,7 @@ Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSay
         if(text.includes("iya")||text.includes("hooh")){
           db.chat[dbIds].rpt.bad++;
           db.chat[dbIds].rpt.botAngryLevel++;
-          m.reply(pickRandom(["BGST", "ANJ", "WTF"]))
+          await m.reply(pickRandom(["BGST", "ANJ", "WTF"]))
           sessions[idSession].state = ""
         }else {
           sessions[idSession].state = ""
@@ -785,9 +785,9 @@ Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSay
               }else {
                 sessions.push({"id": ids, "state": "trim"})
               }
-            }else { m.reply("Tidak dapat mengubah info saya sendiri") }
+            }else { await m.reply("Tidak dapat mengubah info saya sendiri") }
           }else {
-            m.reply(`*${(mention.name) ? mention.name : mention.number}* sudah menjadi admin`)
+            await m.reply(`*${(mention.name) ? mention.name : mention.number}* sudah menjadi admin`)
           }
         }else {
           sessions[idSession].state = ""
@@ -806,9 +806,9 @@ Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSay
                 }else {
                   sessions.push({"id": ids, "state": "trim"})
                 }
-              }else { m.reply("Tidak dapat mengubah info saya sendiri") }
-            }else { m.reply("Tidak bisa mengkudeta *Owner* grup") }
-          }else{ m.reply(`*${(mention.name) ? mention.name : mention.number}* sudah bukan menjadi admin`) }
+              }else { await m.reply("Tidak dapat mengubah info saya sendiri") }
+            }else { await m.reply("Tidak bisa mengkudeta *Owner* grup") }
+          }else{ await m.reply(`*${(mention.name) ? mention.name : mention.number}* sudah bukan menjadi admin`) }
         }else {
           sessions[idSession].state = ""
           next()
@@ -858,7 +858,7 @@ Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSay
             }else {
               sessions.push({"id": ids, "state": "trim"})
             }
-          }else {  db.chat[dbIds].rpt.botAngryLevel--; m.reply("Ini bukan Foto EGE") }
+          }else {  db.chat[dbIds].rpt.botAngryLevel--; await m.reply("Ini bukan Foto EGE") }
         }else { 
           sessions[idSession].state = ""
           next()
