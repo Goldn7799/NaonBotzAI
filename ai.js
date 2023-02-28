@@ -188,6 +188,9 @@ const readDb = ()=>{
       })
     }else {
       dbWord = JSON.parse(res);
+      if(!dbWord.blackList){
+        dbWord.blackList = [];
+      };
       console.log("- Word List Loaded -")
       fs.readFile("./database.json", "utf-8", (err, res)=>{
         if(err){
@@ -236,7 +239,9 @@ handler.on("message", async m =>{
     const qm = await m.getQuotedMessage();
     if (qm.type === "chat"&&!qm.fromMe&&((qm.body).split(" ")).length < 26){
       const qmText = qm.body.toLowerCase()
-      dbWord.wordList.push({"creator": idSender, "action": "reply", "ask": qmText, "ans": text, "rate": "low"});
+      if(dbWord.blackList.filter(q => q === text).length === 0){
+        dbWord.wordList.push({"creator": idSender, "action": "reply", "ask": qmText, "ans": text, "rate": "low"});
+      };
     };
   };
   if(m.hasQuotedMsg&&m.type === "chat"&&(similarity(text, "heh") >= 1.0||similarity(text, "ga boleh") >= mid||similarity(text, "heh ga boleh") >= mid||similarity(text, "weh") >= 1.0||similarity(text, "weh ga boleh") >= mid||similarity(text, "anj") >= 1.0||similarity(text, "anjir") >= 1.0||similarity(text, "anj") >= 1.0||similarity(text, "bgst") >= 1.0||similarity(text, "asu") >= 1.0||similarity(text, "ngentd") >= 1.0)){
@@ -245,6 +250,12 @@ handler.on("message", async m =>{
       await m.reply("Aku belajar dari orang orang ngomong :v");
       await m.react("😅");
     };
+    if(similarity(text, "njir ga boleh") >= mid||similarity(text, "heh ga boleh") >= mid||similarity(text, "weh ga boleh") >= mid){
+      await m.reply("Maaf kak");
+      console.log(`Deleted ${qm.body}`)
+      dbWord.wordList = await dbWord.wordList.filter((obj)=> obj.ans !== qm.body);
+      dbWord.blackList.push(`${qm.body}`);
+    }
   };
 })
 //response
@@ -417,13 +428,18 @@ Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSay
           }) => {
               return `*${title}*\n_${url}_\n_${description}_`
           }).join('\n\n')
-          await m.reply(msg)
+          await m.reply(msg)    
         }else {
-          if(dbWord.chatWordList[m.from]){
+          if(false){
             const result = await search(text, m.from);
             if(result){
               await m.reply(result.ans);
-            };
+            }else {
+              const result = await search(text);
+              if(result){
+                await m.reply(result.ans);
+              };
+            }
           }else {
             const result = await search(text);
             if(result){
