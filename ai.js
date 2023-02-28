@@ -346,6 +346,19 @@ handler.on("message", async m =>{
               await chat.sendMessage(media, { mentions: [await handler.getContactById(idSender)], sendMediaAsSticker: true, stickerAuthor: "SGStudio", stickerName: "Ai Botz|NaonBotz" })
               levelSession[idSender].state = "trim";
             }else { await m.reply("Ini bukan Foto EGE") }
+          }else if(m.hasQuotedMsg){
+            const qmsg = await m.getQuotedMessage();
+            if(qmsg.hasMedia){
+              levelSession[idSender].state = "";
+              chat.sendMessage("Bentar...")
+              const media = await qmsg.downloadMedia();
+              if (media.mimetype === 'image/jpeg' || media.mimetype === 'image/png') {
+                // db.chat[dbIds].rpt.babu++;
+                await m.reply("Nih Stiker")
+                await chat.sendMessage(media, { mentions: [await handler.getContactById(idSender)], sendMediaAsSticker: true, stickerAuthor: "SGStudio", stickerName: "Ai Botz|NaonBotz" })
+                levelSession[idSender].state = "trim";
+              }else { await m.reply("Ini bukan Foto EGE") }
+            }else { m.reply("Mana fotonya??") }
           }else { 
             await m.reply("Mana fotonya?");
             levelSession[idSender].state = "stkr";
@@ -511,6 +524,27 @@ Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSay
             await chat.sendMessage(media, { mentions: [await handler.getContactById(idSender)], sendMediaAsSticker: true, stickerAuthor: "SGStudio", stickerName: "Ai Botz|NaonBotz" })
             levelSession[idSender].state = "trim";
           }else { await m.reply("Ini bukan Foto EGE") }
+        }else if(similarity(text, "ini") >= high){
+          if(m.hasQuotedMsg){
+            const qmsg = await m.getQuotedMessage();
+            if(qmsg.hasMedia){
+              levelSession[idSender].state = "";
+              chat.sendMessage("Bentar...")
+              const media = await qmsg.downloadMedia();
+              if (media.mimetype === 'image/jpeg' || media.mimetype === 'image/png') {
+                // db.chat[dbIds].rpt.babu++;
+                await m.reply("Nih Stiker")
+                await chat.sendMessage(media, { mentions: [await handler.getContactById(idSender)], sendMediaAsSticker: true, stickerAuthor: "SGStudio", stickerName: "Ai Botz|NaonBotz" })
+                levelSession[idSender].state = "trim";
+              }else { await m.reply("Ini bukan Foto EGE") }
+            }else {
+              levelSession[idSender].state = "";
+              next()
+            }
+          }else {
+            levelSession[idSender].state = "";
+            next()
+          }
         }else { 
           levelSession[idSender].state = "";
           next()
