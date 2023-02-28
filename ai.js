@@ -13,6 +13,11 @@ let aiState = {};
 let levelSession = {};
 const owner = "6281228020195@c.us";
 
+//Level Typo's
+const high = 0.8;
+const mid = 0.75;
+const low = 0.7;
+
 //global function
 const pickRandomString = (wordList)=>{
   return `${wordList[Math.floor(Math.random() * wordList.length)]}`
@@ -214,11 +219,6 @@ Host.on("message_create", async mes =>{
     console.log(`Recived :: ${mes.from}(${(await mes.getChat()).name}) | ${mes.author}(${mes._data.notifyName}) => ${(mes.type === "chat") ? mes.body : (mes.type === "sticker") ? "Stiker 😃" : (mes.type === "image") ? "Foto 📷" : (mes.type === "video") ? "Video 🎥" : (mes.type === "audio") ? "Audio 🔉" : (mes.type === "document") ? "Document 📃" : (mes.type === "location") ? "Lokasi 👆" : (mes.type === "contact") ? "Kontak 👤" : (mes.type === "ptt") ? "Pesan Suara 🎙" : (mes.type === "vcard") ? "VCard 📇" : "IDK ❓"}`);
   };
 })
-
-//Level Typo's
-const high = 0.8;
-const mid = 0.75;
-const low = 0.7;
 
 //response AI
 handler.on("message", async m =>{
