@@ -3,6 +3,9 @@ const { Host } = require("./lib/connection.js")
 const { handler } = require("./lib/handler.js")
 const fs = require("fs")
 const similarity = require("similarity")
+const { googleIt, cnbindonesia } = require('@bochilteam/scraper')
+const { MessageMedia } = require('whatsapp-web.js')
+const request = require("request")
 // const chalk = await import("chalk")
 
 //SetUp Global Variable
@@ -48,6 +51,8 @@ const saveDb = async ()=>{
     })
   }, 10000);
 }
+
+
 
 //search keyword
 let keywordDificulty = high;
@@ -114,45 +119,46 @@ const lowSearch = async (text, chatId)=>{
     };
   }else { return false }
 }
+
 const search = async (text, chatId)=>{
   keywordDificulty = high;
-  const high = await highSearch(text, chatId);
-  if(high){
-    return high;
+  const hhighs = await highSearch(text, chatId);
+  if(hhighs){
+    return hhighs;
   }else{
-    const mid = await midSearch(text, chatId)
-    if(mid){
-      return mid;
+    const hmids = await midSearch(text, chatId)
+    if(hmids){
+      return hmids;
     }else {
-      const low = await lowSearch(text, chatId)
-      if(low){
-        return low;
+      const hlows = await lowSearch(text, chatId)
+      if(hlows){
+        return hlows;
       }else {
         keywordDificulty = mid;
-        const high = await highSearch(text, chatId);
-        if(high){
-          return high;
+        const mhighs = await highSearch(text, chatId);
+        if(mhighs){
+          return mhighs;
         }else{
-          const mid = await midSearch(text, chatId)
-          if(mid){
-            return mid;
+          const mmids = await midSearch(text, chatId)
+          if(mmids){
+            return mmids;
           }else {
-            const low = await lowSearch(text, chatId)
-            if(low){
-              return low;
+            const mlows = await lowSearch(text, chatId)
+            if(mlows){
+              return mlows;
             }else {
               keywordDificulty = low;
-              const high = await highSearch(text, chatId);
-              if(high){
-                return high;
+              const lhighs = await highSearch(text, chatId);
+              if(lhighs){
+                return lhighs;
               }else{
-                const mid = await midSearch(text, chatId)
-                if(mid){
-                  return mid;
+                const lmids = await midSearch(text, chatId)
+                if(lmids){
+                  return lmids;
                 }else {
-                  const low = await lowSearch(text, chatId)
-                  if(low){
-                    return low;
+                  const llows = await lowSearch(text, chatId)
+                  if(llows){
+                    return llows;
                   }else {
                     return false;
                   }
@@ -225,9 +231,10 @@ handler.on("message", async m =>{
   const chat = await m.getChat();
   const idSender = (chat.isGroup) ? m.from : m.author;
   const text = m.body.toLowerCase();
-  if(m.hasQuotedMsg&&!m.fromMe&&m.type === "chat"){
+  const textSplit = text.split(" ");
+  if(m.hasQuotedMsg&&!m.fromMe&&m.type === "chat"&&textSplit.length < 26){
     const qm = await m.getQuotedMessage();
-    if (qm.type === "chat"&&!qm.fromMe){
+    if (qm.type === "chat"&&!qm.fromMe&&((qm.body).split(" ")).length < 26){
       const qmText = qm.body.toLowerCase()
       dbWord.wordList.push({"creator": idSender, "action": "reply", "ask": qmText, "ans": text, "rate": "low"});
     };
@@ -358,6 +365,46 @@ handler.on("message", async m =>{
               }else { await m.reply("Tidak bisa mengconvert stiker tersebut :v") }
             }else { await m.reply("Kaga ada stiker nya ege") }
           }else { await m.reply("Ini mah bukan stiker") }
+        }else if(similarity(text, "lu bisa apa saja") >= mid||similarity(text, "kamu bisa apa saja") >= mid||similarity(text, "lu bisa apa") >= mid||similarity(text, "kamu bisa apa") >= mid){
+          await m.react("😁");
+          await m.reply(`
+Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSaya bisa *buatin stiker*,\nSaya bisa memberi tahu *berita terkini*,\nSaya bisa membalas chat anda,\nSaya bisa mencarikan sesuatu di google, contoh *Gimana caranya bersiul?*,\nSaya bisa membuat stiker di *jadiin foto*\nSaya bisa marah,\n memahami sifat seseorang,\n memahami kebiasaan dan mengikuti nya, jadi jangan ngajarin saya hal yang gak bener ygy :v
+          `)
+          await chat.sendMessage("Jika butuh bantuan silahkan hubungi owner :), AI ini masih dalam tahap pengembangan :v", { mentions: [await handler.getContactById(idSender)] });
+          await chat.sendMessage(await handler.getContactById('6281228020195@c.us'), { mentions: [await handler.getContactById(idSender)] });
+        }else if(similarity(text, "news") >= 0.9||similarity(text, "berita hari ini") >= high||similarity(text, "berita terkini") >= high){
+          const result = await cnbindonesia();
+          // db.chat[dbIds].rpt.good++;
+          if(result){
+            await m.reply("Tunggu sebentar ...")
+            downloadImage(result[0].image, './tmp/news.png', async ()=>{
+              const medias = await MessageMedia.fromFilePath("./tmp/news.png");
+              if(medias){
+                await chat.sendMessage(medias, { mentions: [await handler.getContactById(idSender)] });
+                await chat.sendMessage(`*${result[0].title}*\n${result[0].date}\n\n${result[0].link}`, { mentions: [await handler.getContactById(idSender)] })
+              }else{ await m.reply("terjadi kesalahan") }
+            })
+          }else {
+            await m.reply("Tidak ada berita hari ini")
+          }
+        }else if (((similarity(text.split(" ")[0], "cara") >= high||similarity(text.split(" ")[0], "caranya") >= high||similarity(text.split(" ")[0], "apaitu") >= high)&&text.split(" ")[1])||(((similarity(text.split(" ")[0], "bagaimana") >= high||similarity(text.split(" ")[0], "gimana") >= high)&&(similarity(text.split(" ")[1], "cara") >= high||similarity(text.split(" ")[1], "caranya") >= high))&&text.split(" ")[1]&&text.split(" ")[2])){
+          // const searchUrl = `https://www.google.com/search?q=${text.replace(/\s+/g, '+')}`;
+          // db.chat[dbIds].rpt.good++;
+          // import { googleIt } from '@bochilteam/scraper'
+          const fetch = (await import('node-fetch')).default
+          // let full = /f$/i.test(command)
+          // if (!text) return conn.reply(m.chat, 'Tidak ada teks untuk di cari', m)
+          let url = 'https://google.com/search?q=' + encodeURIComponent(text)
+          let search = await googleIt(text)
+          let msg = search.articles.map(({
+              // header,
+              title,
+              url,
+              description
+          }) => {
+              return `*${title}*\n_${url}_\n_${description}_`
+          }).join('\n\n')
+          await m.reply(msg)
         }else {
           if(dbWord.chatWordList[m.from]){
             const result = await search(text, m.from);
@@ -376,6 +423,7 @@ handler.on("message", async m =>{
           dbWord.chatWordList[m.from] = {}
         }else {
           console.log(`Err : ${e}`)
+          throw e;
         }
       }
     };
