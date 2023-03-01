@@ -5,7 +5,7 @@ const fs = require("fs")
 const similarity = require("similarity")
 const { googleIt, cnbindonesia } = require('@bochilteam/scraper')
 const { MessageMedia } = require('whatsapp-web.js')
-const request = require("request")
+const { makeid, pickRandomObject, pickRandomString, downloadImage, saveImageString } = require("./lib/tools.js")
 // const chalk = await import("chalk")
 
 //SetUp Global Variable
@@ -22,24 +22,12 @@ const mid = 0.75;
 const low = 0.7;
 
 //global function
-const pickRandomString = (wordList)=>{
-  return `${wordList[Math.floor(Math.random() * wordList.length)]}`
-}
-const pickRandomObject = (wordList)=>{
-  return wordList[Math.floor(Math.random() * wordList.length)]
-}
 const mirip = (left, right)=>{
   if(left&&right){
     return left.match(RegExp(right.split("").join("\\w*").replace(/\W/, ""), "i"))
   }else { return "err mirip" }
 }
-const downloadImage = (url, filename, callback) => {
-  request.head(url, (err, res, body) => {
-    request(url)
-      .pipe(fs.createWriteStream(filename))
-      .on('close', callback);
-  });
-};
+
 const saveDb = async ()=>{
   setTimeout(() => {
     fs.writeFile("./word-database.json", JSON.stringify(dbWord), (err)=>{
@@ -243,19 +231,29 @@ handler.on("message", async m =>{
         dbWord.wordList.push({"creator": idSender, "action": "reply", "ask": qmText, "ans": text, "rate": "low"});
       };
     };
+  }else if(m.hasQuotedMsg&&!m.fromMe&&m.type === "sticker"){
+    const qm = await m.getQuotedMessage();
+    const rid = makeid(8);
+    if(qm.type === "chat"&&!qm.fromMe&&((qm.body).split(" ")).length < 26&&m.hasMedia){
+      const qmText = qm.body.toLowerCase();
+      saveImageString((await m.downloadMedia()).data, rid);
+      dbWord.wordList.push({"creator": idSender, "action": "sticker", "ask": qmText, "ans": `${rid}.png`, "rate": "low"})
+    };
   };
   if(m.hasQuotedMsg&&m.type === "chat"&&(similarity(text, "heh") >= 1.0||similarity(text, "ga boleh") >= mid||similarity(text, "heh ga boleh") >= mid||similarity(text, "weh") >= 1.0||similarity(text, "weh ga boleh") >= mid||similarity(text, "anj") >= 1.0||similarity(text, "anjir") >= 1.0||similarity(text, "anj") >= 1.0||similarity(text, "bgst") >= 1.0||similarity(text, "asu") >= 1.0||similarity(text, "ngentd") >= 1.0)){
     const qm = await m.getQuotedMessage();
     if(qm.type === "chat"&&qm.fromMe){
       await m.reply("Aku belajar dari orang orang ngomong :v");
       await m.react("😅");
+      if(similarity(text, "njir ga boleh") >= mid||similarity(text, "heh ga boleh") >= mid||similarity(text, "weh ga boleh") >= mid){
+        await m.reply("Maaf kak");
+        if(qm.type === "chat"){
+          console.log(`Deleted ${qm.body}`)
+          dbWord.wordList = await dbWord.wordList.filter((obj)=> obj.ans !== qm.body);
+          dbWord.blackList.push(`${qm.body}`);
+        };
+      }
     };
-    if(similarity(text, "njir ga boleh") >= mid||similarity(text, "heh ga boleh") >= mid||similarity(text, "weh ga boleh") >= mid){
-      await m.reply("Maaf kak");
-      console.log(`Deleted ${qm.body}`)
-      dbWord.wordList = await dbWord.wordList.filter((obj)=> obj.ans !== qm.body);
-      dbWord.blackList.push(`${qm.body}`);
-    }
   };
 })
 //response
@@ -443,7 +441,12 @@ Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSay
           }else {
             const result = await search(text);
             if(result){
-              await m.reply(result.ans);
+              if(result.action === "reply"){
+                await m.reply(result.ans);
+              }else if(result.action === "sticker"){
+                const media = await MessageMedia.fromFilePath(`./tmp/${result.ans}`)
+                await chat.sendMessage(media, { sendMediaAsSticker: true, stickerAuthor: "SGStudio", stickerName: "NaonBotz" })
+              };
             };
           }
         };
