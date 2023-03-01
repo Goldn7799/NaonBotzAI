@@ -402,8 +402,8 @@ Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSay
             downloadImage(result[0].image, './tmp/news.png', async ()=>{
               const medias = await MessageMedia.fromFilePath("./tmp/news.png");
               if(medias){
-                await chat.sendMessage(medias, { mentions: [await handler.getContactById(idSender)] });
-                await chat.sendMessage(`*${result[0].title}*\n${result[0].date}\n\n${result[0].link}`, { mentions: [await handler.getContactById(idSender)] })
+                // await chat.sendMessage(medias, { mentions: [await handler.getContactById(idSender)] });
+                await chat.sendMessage(`*${result[0].title}*\n${result[0].date}\n\n${result[0].link}`, { mentions: [await handler.getContactById(idSender)], media: medias })
               }else{ await m.reply("terjadi kesalahan") }
             })
           }else {
@@ -445,7 +445,7 @@ Saya bisa *promote/demote* user di grup,\nSaya bisa mengirim pesan balasan,\nSay
                 await m.reply(result.ans);
               }else if(result.action === "sticker"){
                 const media = await MessageMedia.fromFilePath(`./tmp/${result.ans}`)
-                await chat.sendMessage(media, { sendMediaAsSticker: true, stickerAuthor: "SGStudio", stickerName: "NaonBotz" })
+                await chat.sendMessage(media, { sendMediaAsSticker: true, stickerAuthor: "SGStudio", stickerName: "NaonBotz", mentions: [await handler.getContactById(idSender)] })
               };
             };
           }
